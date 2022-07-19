@@ -24,7 +24,7 @@ int main()
   "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY)"
   "VALUES(3, 'Teddy', 23, 'Norway', 20000.00 );"
   "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY)"
-  "VALUES(4, 'Mark', 25, 'Rich-Mond ', 65000.00)"_sq2.execmulti(db);
+  "VALUES(4, 'Mark', 25, 'Rich-Mond ', 65000.00)"_sq2.exec(db);
 
   return 0;
 }

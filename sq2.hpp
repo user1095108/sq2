@@ -55,7 +55,7 @@ struct maker
 {
   std::string_view const s_;
 
-  auto execmulti(auto&& db) && noexcept requires(requires{db.get();})
+  auto exec(auto&& db) && noexcept requires(requires{db.get();})
   {
     return sqlite3_exec(db.get(), s_.data(), nullptr, nullptr, nullptr);
   }
