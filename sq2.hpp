@@ -55,7 +55,7 @@ struct maker
 {
   std::string_view const s_;
 
-  auto execmulti(auto&& db) && noexcept
+  auto execmulti(auto&& db) && noexcept requires(requires{db.get();})
   {
     return sqlite3_exec(db.get(), s_.data(), nullptr, nullptr, nullptr);
   }
@@ -78,7 +78,7 @@ struct maker
       (detail::sqlite3_db_deleter()(db), unique_db_t());
   }
 
-  auto shared(sqlite3* const db, unsigned fl = {}) && noexcept
+  auto shared(sqlite3* const db, unsigned const fl = {}) && noexcept
   {
     sqlite3_stmt* s;
 
@@ -90,7 +90,7 @@ struct maker
       shared_stmt_t();
   }
 
-  auto unique(sqlite3* const db, unsigned fl = {}) && noexcept
+  auto unique(sqlite3* const db, unsigned const fl = {}) && noexcept
   {
     sqlite3_stmt* s;
 
