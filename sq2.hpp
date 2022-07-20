@@ -85,26 +85,50 @@ struct maker
       (detail::sqlite3_db_deleter()(db), unique_db_t());
   }
 
-  auto shared(sqlite3* const db, unsigned const fl = {}) && noexcept
+  auto shared(auto&& db, unsigned const fl = {}) && noexcept
   {
     sqlite3_stmt* s;
 
-    auto const r(sqlite3_prepare_v3(db, s_.data(), s_.size(), fl, &s, {}));
-    assert(SQLITE_OK == r);
+    if constexpr(requires{db.get();})
+    {
+      auto const r(sqlite3_prepare_v3(db.get(), s_.data(), s_.size(),
+        fl, &s, {}));
+      assert(SQLITE_OK == r);
 
-    return SQLITE_OK == r ?
-      shared_stmt_t(s, detail::sqlite3_stmt_deleter()) :
-      shared_stmt_t();
+      return SQLITE_OK == r ?
+        shared_stmt_t(s, detail::sqlite3_stmt_deleter()) :
+        shared_stmt_t();
+    }
+    else
+    {
+      auto const r(sqlite3_prepare_v3(db, s_.data(), s_.size(), fl, &s, {}));
+      assert(SQLITE_OK == r);
+
+      return SQLITE_OK == r ?
+        shared_stmt_t(s, detail::sqlite3_stmt_deleter()) :
+        shared_stmt_t();
+    }
   }
 
-  auto unique(sqlite3* const db, unsigned const fl = {}) && noexcept
+  auto unique(auto&& db, unsigned const fl = {}) && noexcept
   {
     sqlite3_stmt* s;
 
-    auto const r(sqlite3_prepare_v3(db, s_.data(), s_.size(), fl, &s, {}));
-    assert(SQLITE_OK == r);
+    if constexpr(requires{db.get();})
+    {
+      auto const r(sqlite3_prepare_v3(db.get(), s_.data(), s_.size(), fl, &s,
+        {}));
+      assert(SQLITE_OK == r);
 
-    return SQLITE_OK == r ? unique_stmt_t(s) : unique_stmt_t();
+      return SQLITE_OK == r ? unique_stmt_t(s) : unique_stmt_t();
+    }
+    else
+    {
+      auto const r(sqlite3_prepare_v3(db, s_.data(), s_.size(), fl, &s, {}));
+      assert(SQLITE_OK == r);
+
+      return SQLITE_OK == r ? unique_stmt_t(s) : unique_stmt_t();
+    }
   }
 };
 
