@@ -55,9 +55,16 @@ struct maker
 {
   std::string_view const s_;
 
-  auto exec(auto&& db) && noexcept requires(requires{db.get();})
+  auto exec(auto&& db) && noexcept
   {
-    return sqlite3_exec(db.get(), s_.data(), nullptr, nullptr, nullptr);
+    if constexpr(requires{db.get();})
+    {
+      return sqlite3_exec(db.get(), s_.data(), nullptr, nullptr, nullptr);
+    }
+    else
+    {
+      return sqlite3_exec(db, s_.data(), nullptr, nullptr, nullptr);
+    }
   }
 
   auto open_shared(int const fl = {}, char const* const zvfs = {}) && noexcept
