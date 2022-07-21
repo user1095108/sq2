@@ -55,11 +55,11 @@ struct maker
   {
     if constexpr(requires{db.get();})
     {
-      return sqlite3_exec(db.get(), s_.data(), nullptr, nullptr, nullptr);
+      return sqlite3_exec(db.get(), s_.data(), {}, {}, {});
     }
     else
     {
-      return sqlite3_exec(db, s_.data(), nullptr, nullptr, nullptr);
+      return sqlite3_exec(db, s_.data(), {}, {}, {});
     }
   }
 
