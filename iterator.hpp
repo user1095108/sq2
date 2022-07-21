@@ -83,9 +83,9 @@ public:
       std::tuple_element_t<0, std::tuple<A...>>
     >;
 
-    return [&]<auto ...I>(std::index_sequence<I...>) noexcept
+    return [&]<auto ...I>(std::index_sequence<I...>) noexcept -> result_t
       {
-        return result_t{
+        return {
           [&]() noexcept
           {
             if constexpr(
