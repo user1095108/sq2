@@ -130,6 +130,7 @@ struct maker
 
 }
 
+template <int I = 1>
 inline auto bind(auto&& stmt, auto&& ...a) noexcept
   requires(sizeof...(a) > std::size_t{})
 {
@@ -144,119 +145,116 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
     s = stmt;
   }
 
-  int i{}, r;
-
-  gnr::invoke_cond(
-    [&](auto&& a) noexcept -> bool
+  return [&]<auto ...J>(auto&& t, std::index_sequence<J...>) noexcept
     {
-      ++i;
+      return (
+        [&]() noexcept
+        {
+          auto&& a(std::get<J>(t));
 
-      if constexpr(
-        std::is_same_v<
-          std::remove_cvref_t<decltype(a)>,
-          std::nullptr_t
-        >
-      )
-      {
-        return r = sqlite3_bind_null(s, i);
-      }
-      else if constexpr(
-        std::is_floating_point_v<
-          std::remove_cvref_t<decltype(a)>
-        >
-      )
-      {
-        return r = sqlite3_bind_double(s, i, a);
-      }
-      else if constexpr(
-        std::is_integral_v<
-          std::remove_cvref_t<decltype(a)>
-        > &&
-        (sizeof(a) <= sizeof(int))
-      )
-      {
-        return sqlite3_bind_int(s, i, a);
-      }
-      else if constexpr(
-        std::is_integral_v<
-          std::remove_cvref_t<decltype(a)>
-        > &&
-        (sizeof(a) > sizeof(int)) &&
-        (sizeof(a) <= sizeof(sqlite3_int64))
-      )
-      {
-        return sqlite3_bind_int64(s, i, a);
-      }
-      else if constexpr(
-        (1 == std::rank_v<std::remove_cvref_t<decltype(a)>>) &&
-        (
-          std::is_same_v<
-            char,
-            std::remove_extent_t<std::remove_cvref_t<decltype(a)>>
-          > ||
-          std::is_same_v<
-            char const,
-            std::remove_extent_t<std::remove_cvref_t<decltype(a)>>
-          >
-        )
-      )
-      {
-        return r =
-          sqlite3_bind_text64(s, i, a, std::size(a) - 1, SQLITE_STATIC,
-            SQLITE_UTF8);
-      }
-      else if constexpr(
-        std::is_same_v<
-          char*,
-          std::remove_cvref_t<decltype(a)>
-        > ||
-        std::is_same_v<
-          char const*,
-          std::remove_cvref_t<decltype(a)>
-        >
-      )
-      {
-        return r =
-          sqlite3_bind_text64(s, i, a, -1, SQLITE_STATIC, SQLITE_UTF8);
-      }
-      else if constexpr(
-        std::is_lvalue_reference_v<decltype(a)> &&
-        (
-          std::is_same_v<
-            std::remove_cvref_t<decltype(a)>,
-            std::string
-          > ||
-          std::is_same_v<
-            std::remove_cvref_t<decltype(a)>,
-            std::string_view
-          >
-        )
-      )
-      {
-        return r =
-          sqlite3_bind_text64(s, i, a.data(), a.size(), SQLITE_STATIC,
-            SQLITE_UTF8);
-      }
-      else if constexpr(
-        std::is_same_v<
-          std::remove_cvref_t<decltype(a)>,
-          std::string
-        > ||
-        std::is_same_v<
-          std::remove_cvref_t<decltype(a)>,
-          std::string_view
-        >
-      )
-      {
-        return r =
-          sqlite3_bind_text64(s, i, a.data(), a.size(), SQLITE_TRANSIENT,
-            SQLITE_UTF8);
-      }
-    },
-    std::forward<decltype(a)>(a)...
-  );
-
-  return r;
+          if constexpr(
+            std::is_same_v<
+              std::remove_cvref_t<decltype(a)>,
+              std::nullptr_t
+            >
+          )
+          {
+            return sqlite3_bind_null(s, I + J);
+          }
+          else if constexpr(
+            std::is_floating_point_v<
+              std::remove_cvref_t<decltype(a)>
+            >
+          )
+          {
+            return sqlite3_bind_double(s, I + J, a);
+          }
+          else if constexpr(
+            std::is_integral_v<
+              std::remove_cvref_t<decltype(a)>
+            > &&
+            (sizeof(a) <= sizeof(int))
+          )
+          {
+            return sqlite3_bind_int(s, I + J, a);
+          }
+          else if constexpr(
+            std::is_integral_v<
+              std::remove_cvref_t<decltype(a)>
+            > &&
+            (sizeof(a) > sizeof(int)) &&
+            (sizeof(a) <= sizeof(sqlite3_int64))
+          )
+          {
+            return sqlite3_bind_int64(s, I + J, a);
+          }
+          else if constexpr(
+            (1 == std::rank_v<std::remove_cvref_t<decltype(a)>>) &&
+            (
+              std::is_same_v<
+                char,
+                std::remove_extent_t<std::remove_cvref_t<decltype(a)>>
+              > ||
+              std::is_same_v<
+                char const,
+                std::remove_extent_t<std::remove_cvref_t<decltype(a)>>
+              >
+            )
+          )
+          {
+            return sqlite3_bind_text64(s, I + J, a, std::size(a) - 1,
+              SQLITE_STATIC, SQLITE_UTF8);
+          }
+          else if constexpr(
+            std::is_same_v<
+              char*,
+              std::remove_cvref_t<decltype(a)>
+            > ||
+            std::is_same_v<
+              char const*,
+              std::remove_cvref_t<decltype(a)>
+            >
+          )
+          {
+            return sqlite3_bind_text64(s, I + J, a, -1, SQLITE_STATIC,
+              SQLITE_UTF8);
+          }
+          else if constexpr(
+            std::is_lvalue_reference_v<decltype(a)> &&
+            (
+              std::is_same_v<
+                std::remove_cvref_t<decltype(a)>,
+                std::string
+              > ||
+              std::is_same_v<
+                std::remove_cvref_t<decltype(a)>,
+                std::string_view
+              >
+            )
+          )
+          {
+            return sqlite3_bind_text64(s, I + J, a.data(), a.size(),
+                SQLITE_STATIC, SQLITE_UTF8);
+          }
+          else if constexpr(
+            std::is_same_v<
+              std::remove_cvref_t<decltype(a)>,
+              std::string
+            > ||
+            std::is_same_v<
+              std::remove_cvref_t<decltype(a)>,
+              std::string_view
+            >
+          )
+          {
+            return sqlite3_bind_text64(s, I + J, a.data(), a.size(),
+                SQLITE_TRANSIENT, SQLITE_UTF8);
+          }
+        }() ||
+        ...
+      );
+    }(std::forward_as_tuple(std::forward<decltype(a)>(a)...),
+      std::make_index_sequence<sizeof...(a)>());
 }
 
 inline auto clear_bindings(auto&& s) noexcept
@@ -285,12 +283,23 @@ inline auto reset(auto&& s) noexcept
 
 inline auto rbind(auto&& s, auto&& ...a) noexcept
 {
-  return
-    reset(std::forward<decltype(s)>(s)) ||
+  return reset(std::forward<decltype(s)>(s)) ||
     bind(
       std::forward<decltype(s)>(s),
       std::forward<decltype(a)>(a)...
     );
+}
+
+inline auto step(auto&& s) noexcept
+{
+  if constexpr(requires{s.get();})
+  {
+    return sqlite3_step(s.get());
+  }
+  else
+  {
+    return sqlite3_step(s);
+  }
 }
 
 namespace literals
