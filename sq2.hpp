@@ -162,26 +162,20 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
             return sqlite3_bind_null(s, I + J);
           }
           else if constexpr(
-            std::is_floating_point_v<
-              std::remove_cvref_t<decltype(a)>
-            >
+            std::is_floating_point_v<std::remove_cvref_t<decltype(a)>>
           )
           {
             return sqlite3_bind_double(s, I + J, a);
           }
           else if constexpr(
-            std::is_integral_v<
-              std::remove_cvref_t<decltype(a)>
-            > &&
+            std::is_integral_v<std::remove_cvref_t<decltype(a)>> &&
             (sizeof(a) <= sizeof(int))
           )
           {
             return sqlite3_bind_int(s, I + J, a);
           }
           else if constexpr(
-            std::is_integral_v<
-              std::remove_cvref_t<decltype(a)>
-            > &&
+            std::is_integral_v<std::remove_cvref_t<decltype(a)>> &&
             (sizeof(a) > sizeof(int)) &&
             (sizeof(a) <= sizeof(sqlite3_int64))
           )
@@ -266,6 +260,30 @@ inline auto clear_bindings(auto&& s) noexcept
   else
   {
     return sqlite3_clear_bindings(s);
+  }
+}
+
+inline auto changes(auto&& db) noexcept
+{
+  if constexpr(requires{db.get();})
+  {
+    return sqlite3_changes(db.get());
+  }
+  else
+  {
+    return sqlite3_changes(db);
+  }
+}
+
+inline auto column_count(auto&& s) noexcept
+{
+  if constexpr(requires{s.get();})
+  {
+    return sqlite3_column_count(s.get());
+  }
+  else
+  {
+    return sqlite3_column_count(s);
   }
 }
 

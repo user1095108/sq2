@@ -16,7 +16,7 @@
 namespace sq2
 {
 
-template <typename ...A>
+template <int I, typename ...A>
 class iterator
 {
 public:
@@ -83,37 +83,37 @@ public:
       std::tuple_element_t<0, std::tuple<A...>>
     >;
 
-    return [&]<auto ...I>(std::index_sequence<I...>) noexcept -> result_t
+    return [&]<auto ...J>(std::index_sequence<J...>) noexcept -> result_t
       {
         return {
           [&]() noexcept
           {
             if constexpr(
               std::is_floating_point_v<
-                std::tuple_element_t<I, std::tuple<A...>>
+                std::tuple_element_t<J, std::tuple<A...>>
               >
             )
             {
-              return sqlite3_column_double(s_, I);
+              return sqlite3_column_double(s_, I + J);
             }
             else if constexpr(
               std::is_integral_v<
-                std::tuple_element_t<I, std::tuple<A...>>
+                std::tuple_element_t<J, std::tuple<A...>>
               >
             )
             {
-              return sqlite3_column_int(s_, I);
+              return sqlite3_column_int(s_, I + J);
             }
             else if constexpr(
               std::is_same_v<
-                std::tuple_element_t<I, std::tuple<A...>>,
+                std::tuple_element_t<J, std::tuple<A...>>,
                 std::string_view
               >
             )
             {
               return std::string_view(
-                reinterpret_cast<char const*>(sqlite3_column_text(s_, I)),
-                sqlite3_column_bytes(s_, I)
+                reinterpret_cast<char const*>(sqlite3_column_text(s_, I + J)),
+                sqlite3_column_bytes(s_, I + J)
               );
             }
           }()...
@@ -122,33 +122,51 @@ public:
   }
 };
 
-template <typename ...A>
-class range
+template <int I, typename ...A>
+class offset_range
 {
   sqlite3_stmt* const s_;
 
 public:
-  range(auto&& s) noexcept requires(requires{s.get();}): s_{s.get()} { }
-  range(sqlite3_stmt* const s) noexcept: s_{s} { }
+  offset_range(auto&& s) noexcept requires(requires{s.get();}):
+    s_{s.get()}
+  {
+  }
 
-  range(range const&) = default;
-  range(range&&) = default;
+  offset_range(sqlite3_stmt* const s) noexcept:
+    s_{s}
+  {
+  }
+
+  offset_range(offset_range const&) = default;
+  offset_range(offset_range&&) = default;
 
   //
-  range& operator=(range const&) = default;
-  range& operator=(range&&) = default;
+  offset_range& operator=(offset_range const&) = default;
+  offset_range& operator=(offset_range&&) = default;
 
   //
-  bool operator==(range const&) const noexcept = default;
+  bool operator==(offset_range const&) const noexcept = default;
 
   //
-  auto begin() const noexcept { return iterator<A...>(s_); }
-  auto end() const noexcept { return iterator<A...>(); }
+  auto begin() const noexcept { return iterator<I, A...>(s_); }
+  auto end() const noexcept { return iterator<I, A...>(); }
 
   //
   auto clear_bindings() const noexcept { return sqlite3_clear_bindings(s_); }
   auto reset() const noexcept { return sqlite3_reset(s_); }
 };
+
+template <typename ...A>
+class range : public offset_range<0, A...>
+{
+public:
+  using offset_range<0, A...>::offset_range;
+
+  using offset_range<0, A...>::operator=;
+  using offset_range<0, A...>::operator==;
+};
+
 
 }
 
