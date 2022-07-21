@@ -62,63 +62,66 @@ public:
   auto operator*() const noexcept
   {
     return [&]<auto ...I>(std::index_sequence<I...>) noexcept
-      {
-        std::tuple<A...> t;
-
-        (
-          [&]() noexcept
+    {
+      std::tuple<A...> t{
+        [&]() noexcept
+        {
+          if constexpr(
+            std::is_floating_point_v<
+              std::tuple_element_t<I, decltype(t)>
+            >
+          )
           {
-            if constexpr(
-              std::is_floating_point_v<
-                std::tuple_element_t<I, decltype(t)>
-              >
-            )
-            {
-              std::get<I>(t) = sqlite3_column_double(s_, I);
-            }
-            else if constexpr(
-              std::is_integral_v<
-                std::tuple_element_t<I, decltype(t)>
-              >
-            )
-            {
-              std::get<I>(t) = sqlite3_column_int(s_, I);
-            }
-            else if constexpr(
-              std::is_same_v<
-                std::tuple_element_t<I, decltype(t)>,
-                std::string_view
-              >
-            )
-            {
-              std::get<I>(t) = std::string_view(
-                reinterpret_cast<char const*>(sqlite3_column_text(s_, I)),
-                sqlite3_column_bytes(s_, I)
-              );
-            }
-          }(),
-          ...
-        );
+            return sqlite3_column_double(s_, I);
+          }
+          else if constexpr(
+            std::is_integral_v<
+              std::tuple_element_t<I, decltype(t)>
+            >
+          )
+          {
+            return sqlite3_column_int(s_, I);
+          }
+          else if constexpr(
+            std::is_same_v<
+              std::tuple_element_t<I, decltype(t)>,
+              std::string_view
+            >
+          )
+          {
+            return std::string_view(
+              reinterpret_cast<char const*>(sqlite3_column_text(s_, I)),
+              sqlite3_column_bytes(s_, I)
+            );
+          }
+        }()...
+      };
 
-        if constexpr(sizeof...(A) == 1)
-        {
-          return std::get<0>(t);
-        }
-        else
-        {
-          return t;
-        }
-      }(std::make_index_sequence<sizeof...(A)>());
+      if constexpr(sizeof...(A) == 1)
+      {
+        return std::get<0>(t);
+      }
+      else
+      {
+        return t;
+      }
+    }(std::make_index_sequence<sizeof...(A)>());
   }
 };
 
 template <typename ...A>
-struct range
+class range
 {
-  tableiterator<A...> b_;
+  sqlite3_stmt* const s_;
 
-  range(auto&& s) noexcept:
-    b_(std::forward<decltype(s)>(s))
+public:
+  range(auto&& s) noexcept requires(!requires{s.get();}):
+    s_{s}
+  {
+  }
+
+  range(auto&& s) noexcept requires(requires{s.get();}):
+    s_{s.get()}
   {
   }
 
@@ -133,8 +136,8 @@ struct range
   bool operator==(range const&) const noexcept = default;
 
   //
-  auto& begin() const noexcept { return b_; }
-  auto end() const noexcept { return decltype(b_)(); }
+  auto begin() const noexcept { return tableiterator<A...>(s_); }
+  auto end() const noexcept { return tableiterator<A...>(); }
 };
 
 }
