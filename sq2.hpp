@@ -298,7 +298,8 @@ inline auto reset(auto&& s) noexcept
 
 inline auto rbind(auto&& s, auto&& ...a) noexcept
 {
-  return reset(std::forward<decltype(s)>(s)) ||
+  return
+    reset(std::forward<decltype(s)>(s)) ||
     bind(
       std::forward<decltype(s)>(s),
       std::forward<decltype(a)>(a)...
