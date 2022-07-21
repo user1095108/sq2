@@ -47,6 +47,7 @@ public:
   tableiterator& operator=(tableiterator const&) = default;
   tableiterator& operator=(tableiterator&&) = default;
 
+  //
   bool operator==(tableiterator const& o) const noexcept = default;
 
   // increment, decrement
@@ -63,41 +64,17 @@ public:
   // member access
   auto operator*() const noexcept
   {
-    int i{};
-
     std::tuple<A...> t;
 
     gnr::apply(
       [&](auto&& ...a) noexcept
       {
+        int i{};
+
         (
           [&](auto& a) noexcept
           {
             if constexpr(
-              std::is_same_v<
-                std::remove_cvref_t<decltype(a)>,
-                std::string
-              >
-            )
-            {
-              a = std::string(
-                reinterpret_cast<char const*>(sqlite3_column_text(s_, i)),
-                sqlite3_column_bytes(s_, i)
-              );
-            }
-            else if constexpr(
-              std::is_same_v<
-                std::remove_cvref_t<decltype(a)>,
-                std::string_view
-              >
-            )
-            {
-              a = std::string_view(
-                reinterpret_cast<char const*>(sqlite3_column_text(s_, i)),
-                sqlite3_column_bytes(s_, i)
-              );
-            }
-            else if constexpr(
               std::is_floating_point_v<
                 std::remove_cvref_t<decltype(a)>
               >
@@ -113,6 +90,18 @@ public:
             {
               a = sqlite3_column_int(s_, i);
             }
+            else if constexpr(
+              std::is_same_v<
+                std::remove_cvref_t<decltype(a)>,
+                std::string_view
+              >
+            )
+            {
+              a = std::string_view(
+                reinterpret_cast<char const*>(sqlite3_column_text(s_, i)),
+                sqlite3_column_bytes(s_, i)
+              );
+            }
 
             ++i;
           }(std::forward<decltype(a)>(a)),
@@ -122,7 +111,14 @@ public:
       t
     );
 
-    return t;
+    if constexpr(sizeof...(A) == 1)
+    {
+      return std::get<0>(t);
+    }
+    else
+    {
+      return t;
+    }
   }
 };
 
