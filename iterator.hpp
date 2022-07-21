@@ -149,6 +149,7 @@ public:
   auto end() const noexcept { return iterator<A...>(); }
 
   //
+  auto clear_bindings() const noexcept { return sqlite3_clear_bindings(s_); }
   auto reset() const noexcept { return sqlite3_reset(s_); }
 };
 
