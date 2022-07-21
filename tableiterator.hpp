@@ -61,61 +61,54 @@ public:
   // member access
   auto operator*() const noexcept
   {
-    std::tuple<A...> t;
-
-    gnr::apply(
-      [&](auto&& ...a) noexcept
+    return [&]<auto ...I>(std::index_sequence<I...>) noexcept
       {
-        int i{};
+        std::tuple<A...> t;
 
         (
-          [&](auto& a) noexcept
+          [&]() noexcept
           {
             if constexpr(
               std::is_floating_point_v<
-                std::remove_cvref_t<decltype(a)>
+                std::tuple_element_t<I, decltype(t)>
               >
             )
             {
-              a = sqlite3_column_double(s_, i);
+              std::get<I>(t) = sqlite3_column_double(s_, I);
             }
             else if constexpr(
               std::is_integral_v<
-                std::remove_cvref_t<decltype(a)>
+                std::tuple_element_t<I, decltype(t)>
               >
             )
             {
-              a = sqlite3_column_int(s_, i);
+              std::get<I>(t) = sqlite3_column_int(s_, I);
             }
             else if constexpr(
               std::is_same_v<
-                std::remove_cvref_t<decltype(a)>,
+                std::tuple_element_t<I, decltype(t)>,
                 std::string_view
               >
             )
             {
-              a = std::string_view(
-                reinterpret_cast<char const*>(sqlite3_column_text(s_, i)),
-                sqlite3_column_bytes(s_, i)
+              std::get<I>(t) = std::string_view(
+                reinterpret_cast<char const*>(sqlite3_column_text(s_, I)),
+                sqlite3_column_bytes(s_, I)
               );
             }
-
-            ++i;
-          }(std::forward<decltype(a)>(a)),
+          }(),
           ...
         );
-      },
-      t
-    );
 
-    if constexpr(sizeof...(A) == 1)
-    {
-      return std::get<0>(t);
-    }
-    else
-    {
-      return t;
-    }
+        if constexpr(sizeof...(A) == 1)
+        {
+          return std::get<0>(t);
+        }
+        else
+        {
+          return t;
+        }
+      }(std::make_index_sequence<sizeof...(A)>());
   }
 };
 
