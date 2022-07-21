@@ -124,15 +124,8 @@ class range
   sqlite3_stmt* const s_;
 
 public:
-  range(auto&& s) noexcept requires(requires{s.get();}):
-    s_{s.get()}
-  {
-  }
-
-  range(sqlite3_stmt* const s) noexcept:
-    s_{s}
-  {
-  }
+  range(auto&& s) noexcept requires(requires{s.get();}): s_{s.get()} { }
+  range(sqlite3_stmt* const s) noexcept: s_{s} { }
 
   range(range const&) = default;
   range(range&&) = default;
