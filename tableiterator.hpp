@@ -40,14 +40,14 @@ public:
     }
   }
 
+  tableiterator(tableiterator const&) = default;
+  tableiterator(tableiterator&&) = default;
+
   //
   tableiterator& operator=(tableiterator const&) = default;
   tableiterator& operator=(tableiterator&&) = default;
 
-  bool operator==(tableiterator const& o) const noexcept
-  {
-    return s_ == o.s_;
-  }
+  bool operator==(tableiterator const& o) const noexcept = default;
 
   // increment, decrement
   auto& operator++() noexcept
@@ -124,6 +124,31 @@ public:
 
     return t;
   }
+};
+
+template <typename ...A>
+struct range
+{
+  tableiterator<A...> b_;
+
+  range(auto&& s) noexcept:
+    b_(std::forward<decltype(s)>(s))
+  {
+  }
+
+  range(range const&) = default;
+  range(range&&) = default;
+
+  //
+  range& operator=(range const&) = default;
+  range& operator=(range&&) = default;
+
+  //
+  bool operator==(range const&) const noexcept = default;
+
+  //
+  auto& begin() const noexcept { return b_; }
+  auto end() const noexcept { return decltype(b_)(); }
 };
 
 }

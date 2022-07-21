@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ranges>
 
 #include "sq2.hpp"
 
@@ -30,14 +31,14 @@ int main()
   {
     auto const s1("SELECT * FROM COMPANY"_sq2.unique(db));
 
-    for (sq2::tableiterator<std::string_view, int, std::string_view,
-      double> i(s1); i != decltype(i)(); ++i)
+    for (auto&& t:
+      sq2::range<std::string_view, int, std::string_view, double>(s1))
     {
       std::cout <<
-        std::get<0>(*i) << " " <<
-        std::get<1>(*i) << " " <<
-        std::get<2>(*i) << " " << 
-        std::get<3>(*i) << std::endl;
+        std::get<0>(t) << " " <<
+        std::get<1>(t) << " " <<
+        std::get<2>(t) << " " << 
+        std::get<3>(t) << std::endl;
     }
   }
 

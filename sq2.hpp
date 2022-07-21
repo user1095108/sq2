@@ -152,8 +152,6 @@ inline auto exec(auto&& stmt) noexcept
 
 inline auto exec(auto&& stmt, auto&& ...a) noexcept
 {
-  int i{}, r;
-
   sqlite3_stmt* s;
 
   if constexpr(requires{stmt.get();})
@@ -164,6 +162,8 @@ inline auto exec(auto&& stmt, auto&& ...a) noexcept
   {
     s = stmt;
   }
+
+  int i{}, r;
 
   if (gnr::invoke_cond(
       [&](auto&& a) noexcept -> bool
