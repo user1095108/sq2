@@ -154,7 +154,7 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
       if constexpr(
         std::is_same_v<
           std::remove_cvref_t<decltype(a)>,
-          nullptr_t
+          std::nullptr_t
         >
       )
       {

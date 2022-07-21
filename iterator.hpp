@@ -73,9 +73,15 @@ public:
   // member access
   auto operator*() const noexcept
   {
-    auto const t([&]<auto ...I>(std::index_sequence<I...>) noexcept
+    using result_t = std::conditional_t<
+      (sizeof...(A) > 1),
+      std::tuple<A...>,
+      std::tuple_element_t<0, std::tuple<A...>>
+    >;
+
+    return [&]<auto ...I>(std::index_sequence<I...>) noexcept
       {
-        return std::tuple<A...>{
+        return result_t{
           [&]() noexcept
           {
             if constexpr(
@@ -108,17 +114,7 @@ public:
             }
           }()...
         };
-      }(std::make_index_sequence<sizeof...(A)>())
-    );
-
-    if constexpr(sizeof...(A) == 1)
-    {
-      return std::get<0>(t);
-    }
-    else
-    {
-      return t;
-    }
+      }(std::make_index_sequence<sizeof...(A)>());
   }
 };
 
