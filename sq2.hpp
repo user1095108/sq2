@@ -4,11 +4,15 @@
 
 #include <cassert>
 #include <memory>
+#include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
-#include "sqlite3.h"
+#include "generic/invoke.hpp"
+
+#include "tableiterator.hpp"
 
 namespace sq2
 {
@@ -132,6 +136,104 @@ struct maker
   }
 };
 
+}
+
+inline auto exec(auto&& stmt) noexcept
+{
+  if constexpr(requires{stmt.get();})
+  {
+    return sqlite3_step(stmt.get());
+  }
+  else
+  {
+    return sqlite3_step(stmt);
+  }
+}
+
+inline auto exec(auto&& stmt, auto&& ...a) noexcept
+{
+  int i{}, r;
+
+  sqlite3_stmt* s;
+
+  if constexpr(requires{stmt.get();})
+  {
+    s = stmt.get();
+  }
+  else
+  {
+    s = stmt;
+  }
+
+  if (gnr::invoke_cond(
+      [&](auto&& a) noexcept -> bool
+      {
+        ++i;
+
+        if constexpr(
+          std::is_same_v<
+            std::remove_cvref_t<decltype(a)>,
+            nullptr_t
+          >
+        )
+        {
+          return r = sqlite3_bind_null(s, i);
+        }
+        else if constexpr(
+          std::is_floating_point_v<
+            std::remove_cvref_t<decltype(a)>
+          >
+        )
+        {
+          return r = sqlite3_bind_double(s, i, a);
+        }
+        else if constexpr(
+          std::is_same_v<
+            std::remove_cvref_t<decltype(a)>,
+            char*
+          > ||
+          std::is_same_v<
+            std::remove_cvref_t<decltype(a)>,
+            char const*
+          >
+        )
+        {
+          return r =
+            sqlite3_bind_text64(s, i, a, -1, SQLITE_STATIC, SQLITE_UTF8);
+        }
+      },
+      std::forward<decltype(a)>(a)...
+    )
+  )
+  {
+    return r;
+  }
+  else
+  {
+    return sqlite3_step(s);
+  }
+}
+
+inline auto reset(auto&& s) noexcept
+{
+  if constexpr(requires{s.get();})
+  {
+    return sqlite3_reset(s.get());
+  }
+  else
+  {
+    return sqlite3_reset(s);
+  }
+}
+
+inline auto rexec(auto&& s, auto&& ...a) noexcept
+{
+  return
+    reset(std::forward<decltype(s)>(s)) ||
+    exec(
+      std::forward<decltype(s)>(s),
+      std::forward<decltype(a)>(a)...
+    );
 }
 
 namespace literals
