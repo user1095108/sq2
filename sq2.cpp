@@ -67,9 +67,7 @@ int main()
       "SELECT group_concat(rtrim(t),x'0a')FROM a"_sq2.unique(db)
     );
 
-    sq2::range<std::string_view> const r(s);
-
-    std::cout << *r.begin() << std::endl;
+    std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
   }
 
   return 0;
