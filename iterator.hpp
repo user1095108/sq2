@@ -1,6 +1,15 @@
-#ifndef SQ2_TABLEITERATOR_HPP
-# define SQ2_TABLEITERATOR_HPP
+#ifndef SQ2_ITERATOR_HPP
+# define SQ2_ITERATOR_HPP
 # pragma once
+
+#include <cassert>
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <type_traits>
+#include <utility>
 
 #include "sqlite3.h"
 
@@ -8,11 +17,11 @@ namespace sq2
 {
 
 template <typename ...A>
-class tableiterator
+class iterator
 {
 public:
   using iterator_category = std::forward_iterator_tag;
-  using difference_type = std::ptrdiff_t;
+  using difference_type = std::uintmax_t;
 
   using value_type = std::tuple<A...>;
   using pointer = value_type*;
@@ -21,9 +30,9 @@ public:
   sqlite3_stmt* s_;
 
 public:
-  tableiterator() = default;
+  iterator() = default;
 
-  tableiterator(auto&& s) noexcept
+  iterator(auto&& s) noexcept
   {
     if constexpr(requires{s.get();})
     {
@@ -37,15 +46,15 @@ public:
     ++*this;
   }
 
-  tableiterator(tableiterator const&) = default;
-  tableiterator(tableiterator&&) = default;
+  iterator(iterator const&) = default;
+  iterator(iterator&&) = default;
 
   //
-  tableiterator& operator=(tableiterator const&) = default;
-  tableiterator& operator=(tableiterator&&) = default;
+  iterator& operator=(iterator const&) = default;
+  iterator& operator=(iterator&&) = default;
 
   //
-  bool operator==(tableiterator const& o) const noexcept = default;
+  bool operator==(iterator const& o) const noexcept = default;
 
   // increment, decrement
   auto& operator++() noexcept
@@ -136,10 +145,10 @@ public:
   bool operator==(range const&) const noexcept = default;
 
   //
-  auto begin() const noexcept { return tableiterator<A...>(s_); }
-  auto end() const noexcept { return tableiterator<A...>(); }
+  auto begin() const noexcept { return iterator<A...>(s_); }
+  auto end() const noexcept { return iterator<A...>(); }
 };
 
 }
 
-#endif // SQ2_TABLEITERATOR_HPP
+#endif // SQ2_ITERATOR_HPP

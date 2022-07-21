@@ -2,17 +2,9 @@
 # define SQ2_HPP
 # pragma once
 
-#include <cassert>
-#include <memory>
-#include <string>
-#include <string_view>
-#include <tuple>
-#include <type_traits>
-#include <utility>
-
 #include "generic/invoke.hpp"
 
-#include "tableiterator.hpp"
+#include "iterator.hpp"
 
 namespace sq2
 {
