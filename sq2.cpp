@@ -12,6 +12,14 @@ int main()
     )
   );
 
+  {
+    auto const s("SELECT ?/?"_sq2.unique(db));
+
+    sq2::bind(s, 1., 3);
+
+    std::cout << *sq2::range<double>(s).begin() << std::endl;
+  }
+
   "DROP TABLE IF EXISTS COMPANY;"
   "CREATE TABLE COMPANY("
   "NAME           TEXT    NOT NULL,"
