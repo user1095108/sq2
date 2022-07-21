@@ -34,10 +34,7 @@ public:
       s_ = s;
     }
 
-    if (SQLITE_ROW != sqlite3_step(s_))
-    {
-      s_ = {};
-    }
+    ++*this;
   }
 
   tableiterator(tableiterator const&) = default;
@@ -53,7 +50,7 @@ public:
   // increment, decrement
   auto& operator++() noexcept
   {
-    if (auto const r(sqlite3_step(s_)); SQLITE_ROW != r)
+    if (SQLITE_ROW != sqlite3_step(s_))
     {
       s_ = {};
     }
