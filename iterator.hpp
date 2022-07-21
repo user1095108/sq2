@@ -62,9 +62,13 @@ public:
   // increment, decrement
   auto& operator++() noexcept
   {
-    if (SQLITE_ROW != sqlite3_step(s_))
+    if (auto const r(sqlite3_step(s_)); SQLITE_DONE == r)
     {
       s_ = {};
+    }
+    else
+    {
+      assert(SQLITE_ROW == r);
     }
 
     return *this;
