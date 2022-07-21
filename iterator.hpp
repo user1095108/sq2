@@ -33,6 +33,9 @@ public:
   iterator() = default;
 
   iterator(auto&& s) noexcept
+    requires(
+      !std::is_same_v<iterator, std::remove_cvref_t<decltype(s)>>
+    )
   {
     if constexpr(requires{s.get();})
     {
@@ -70,51 +73,52 @@ public:
   // member access
   auto operator*() const noexcept
   {
-    return [&]<auto ...I>(std::index_sequence<I...>) noexcept
-    {
-      std::tuple<A...> t{
-        [&]() noexcept
-        {
-          if constexpr(
-            std::is_floating_point_v<
-              std::tuple_element_t<I, decltype(t)>
-            >
-          )
+    auto const t([&]<auto ...I>(std::index_sequence<I...>) noexcept
+      {
+        return std::tuple<A...>{
+          [&]() noexcept
           {
-            return sqlite3_column_double(s_, I);
-          }
-          else if constexpr(
-            std::is_integral_v<
-              std::tuple_element_t<I, decltype(t)>
-            >
-          )
-          {
-            return sqlite3_column_int(s_, I);
-          }
-          else if constexpr(
-            std::is_same_v<
-              std::tuple_element_t<I, decltype(t)>,
-              std::string_view
-            >
-          )
-          {
-            return std::string_view(
-              reinterpret_cast<char const*>(sqlite3_column_text(s_, I)),
-              sqlite3_column_bytes(s_, I)
-            );
-          }
-        }()...
-      };
+            if constexpr(
+              std::is_floating_point_v<
+                std::tuple_element_t<I, std::tuple<A...>>
+              >
+            )
+            {
+              return sqlite3_column_double(s_, I);
+            }
+            else if constexpr(
+              std::is_integral_v<
+                std::tuple_element_t<I, std::tuple<A...>>
+              >
+            )
+            {
+              return sqlite3_column_int(s_, I);
+            }
+            else if constexpr(
+              std::is_same_v<
+                std::tuple_element_t<I, std::tuple<A...>>,
+                std::string_view
+              >
+            )
+            {
+              return std::string_view(
+                reinterpret_cast<char const*>(sqlite3_column_text(s_, I)),
+                sqlite3_column_bytes(s_, I)
+              );
+            }
+          }()...
+        };
+      }(std::make_index_sequence<sizeof...(A)>())
+    );
 
-      if constexpr(sizeof...(A) == 1)
-      {
-        return std::get<0>(t);
-      }
-      else
-      {
-        return t;
-      }
-    }(std::make_index_sequence<sizeof...(A)>());
+    if constexpr(sizeof...(A) == 1)
+    {
+      return std::get<0>(t);
+    }
+    else
+    {
+      return t;
+    }
   }
 };
 
@@ -124,13 +128,13 @@ class range
   sqlite3_stmt* const s_;
 
 public:
-  range(auto&& s) noexcept requires(!requires{s.get();}):
-    s_{s}
+  range(auto&& s) noexcept requires(requires{s.get();}):
+    s_{s.get()}
   {
   }
 
-  range(auto&& s) noexcept requires(requires{s.get();}):
-    s_{s.get()}
+  range(sqlite3_stmt* const s) noexcept:
+    s_{s}
   {
   }
 
@@ -147,6 +151,9 @@ public:
   //
   auto begin() const noexcept { return iterator<A...>(s_); }
   auto end() const noexcept { return iterator<A...>(); }
+
+  //
+  auto reset() const noexcept { return sqlite3_reset(s_); }
 };
 
 }

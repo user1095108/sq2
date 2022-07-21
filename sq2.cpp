@@ -31,8 +31,9 @@ int main()
   {
     auto const s("SELECT * FROM COMPANY"_sq2.unique(db));
 
-    for (auto&& t:
-      sq2::range<std::string_view, int, std::string_view, double>(s))
+    sq2::range<std::string_view, int, std::string_view, double> const r(s);
+
+    for (auto&& t: r)
     {
       std::cout <<
         std::get<0>(t) << " " <<
@@ -40,6 +41,9 @@ int main()
         std::get<2>(t) << " " << 
         std::get<3>(t) << std::endl;
     }
+
+    r.reset();
+    std::cout << std::distance(r.begin(), r.end()) << std::endl;
   }
 
   {
@@ -63,10 +67,9 @@ int main()
       "SELECT group_concat(rtrim(t),x'0a')FROM a"_sq2.unique(db)
     );
 
-    for (auto&& q: sq2::range<std::string_view>(s))
-    {
-      std::cout << q << std::endl;
-    }
+    sq2::range<std::string_view> const r(s);
+
+    std::cout << *r.begin() << std::endl;
   }
 
   return 0;
