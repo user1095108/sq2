@@ -300,7 +300,7 @@ inline auto rbind(auto&& s, auto&& ...a) noexcept
     return bind(
       std::forward<decltype(s)>(s),
       std::forward<decltype(a)>(a)...
-    )
+    );
   }
   else
   {
