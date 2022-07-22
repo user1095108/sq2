@@ -127,7 +127,7 @@ struct maker
 
 template <int I = 1>
 inline auto bind(auto&& stmt, auto&& ...a) noexcept
-  requires(sizeof...(a) > std::size_t{})
+  requires(bool(sizeof...(a)))
 {
   sqlite3_stmt* s;
 
