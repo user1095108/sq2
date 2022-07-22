@@ -245,18 +245,6 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
     }(std::forward_as_tuple(a...), std::make_index_sequence<sizeof...(a)>());
 }
 
-inline auto clear_bindings(auto&& s) noexcept
-{
-  if constexpr(requires{s.get();})
-  {
-    return sqlite3_clear_bindings(s.get());
-  }
-  else
-  {
-    return sqlite3_clear_bindings(s);
-  }
-}
-
 inline auto changes(auto&& db) noexcept
 {
   if constexpr(requires{db.get();})
@@ -266,6 +254,18 @@ inline auto changes(auto&& db) noexcept
   else
   {
     return sqlite3_changes(db);
+  }
+}
+
+inline auto clear_bindings(auto&& s) noexcept
+{
+  if constexpr(requires{s.get();})
+  {
+    return sqlite3_clear_bindings(s.get());
+  }
+  else
+  {
+    return sqlite3_clear_bindings(s);
   }
 }
 
