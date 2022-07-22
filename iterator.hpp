@@ -167,7 +167,6 @@ public:
   using offset_range<0, A...>::operator==;
 };
 
-
 }
 
 #endif // SQ2_ITERATOR_HPP
