@@ -142,7 +142,9 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
 
   return [&]<auto ...J>(auto&& t, std::index_sequence<J...>) noexcept
     {
-      return (
+      int r;
+
+      (
         [&]() noexcept
         {
           auto&& a(std::get<J>(t));
@@ -154,13 +156,13 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
             >
           )
           {
-            return sqlite3_bind_null(s, I + J);
+            return r = sqlite3_bind_null(s, I + J);
           }
           else if constexpr(
             std::is_floating_point_v<std::remove_cvref_t<decltype(a)>>
           )
           {
-            return sqlite3_bind_double(s, I + J, a);
+            return r = sqlite3_bind_double(s, I + J, a);
           }
           else if constexpr(
             std::is_integral_v<std::remove_cvref_t<decltype(a)>> &&
@@ -175,7 +177,7 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
             (sizeof(a) <= sizeof(sqlite3_int64))
           )
           {
-            return sqlite3_bind_int64(s, I + J, a);
+            return r = sqlite3_bind_int64(s, I + J, a);
           }
           else if constexpr(
             (1 == std::rank_v<std::remove_cvref_t<decltype(a)>>) &&
@@ -191,7 +193,7 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
             )
           )
           {
-            return sqlite3_bind_text64(s, I + J, a, std::size(a) - 1,
+            return r = sqlite3_bind_text64(s, I + J, a, std::size(a) - 1,
               SQLITE_STATIC, SQLITE_UTF8);
           }
           else if constexpr(
@@ -205,7 +207,7 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
             >
           )
           {
-            return sqlite3_bind_text64(s, I + J, a, -1, SQLITE_STATIC,
+            return r = sqlite3_bind_text64(s, I + J, a, -1, SQLITE_STATIC,
               SQLITE_UTF8);
           }
           else if constexpr(
@@ -222,7 +224,7 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
             )
           )
           {
-            return sqlite3_bind_text64(s, I + J, a.data(), a.size(),
+            return r = sqlite3_bind_text64(s, I + J, a.data(), a.size(),
                 SQLITE_STATIC, SQLITE_UTF8);
           }
           else if constexpr(
@@ -236,12 +238,14 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
             >
           )
           {
-            return sqlite3_bind_text64(s, I + J, a.data(), a.size(),
+            return r = sqlite3_bind_text64(s, I + J, a.data(), a.size(),
                 SQLITE_TRANSIENT, SQLITE_UTF8);
           }
         }() ||
         ...
       );
+
+      return r;
     }(std::forward_as_tuple(a...), std::make_index_sequence<sizeof...(a)>());
 }
 
