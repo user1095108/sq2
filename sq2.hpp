@@ -2,8 +2,6 @@
 # define SQ2_HPP
 # pragma once
 
-#include "generic/invoke.hpp"
-
 #include "iterator.hpp"
 
 namespace sq2
@@ -244,8 +242,7 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
         }() ||
         ...
       );
-    }(std::forward_as_tuple(std::forward<decltype(a)>(a)...),
-      std::make_index_sequence<sizeof...(a)>());
+    }(std::forward_as_tuple(a...), std::make_index_sequence<sizeof...(a)>());
 }
 
 inline auto clear_bindings(auto&& s) noexcept
