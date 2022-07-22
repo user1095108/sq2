@@ -169,7 +169,7 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
             (sizeof(a) <= sizeof(int))
           )
           {
-            return sqlite3_bind_int(s, I + J, a);
+            return r = sqlite3_bind_int(s, I + J, a);
           }
           else if constexpr(
             std::is_integral_v<std::remove_cvref_t<decltype(a)>> &&
