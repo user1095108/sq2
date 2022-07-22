@@ -253,11 +253,11 @@ inline auto changes(auto&& db) noexcept
 {
   if constexpr(requires{db.get();})
   {
-    return sqlite3_changes(db.get());
+    return sqlite3_changes64(db.get());
   }
   else
   {
-    return sqlite3_changes(db);
+    return sqlite3_changes64(db);
   }
 }
 
