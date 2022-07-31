@@ -14,7 +14,7 @@ void print_tuple(auto&& t) noexcept
     (
       [&]()
       {
-        if constexpr(I > 0)
+        if constexpr(I)
         {
           std::cout << ", ";
         }
