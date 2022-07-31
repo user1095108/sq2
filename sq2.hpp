@@ -271,17 +271,17 @@ inline auto reset(auto&& s) noexcept
 
 inline auto rbind(auto&& s, auto&& ...a) noexcept
 {
-  if (auto const r(reset(std::forward<decltype(s)>(s))); SQLITE_OK == r)
-  {
-    return bind(
+  int r;
+
+  (r = reset(std::forward<decltype(s)>(s))) ||
+  (
+    r = bind(
       std::forward<decltype(s)>(s),
       std::forward<decltype(a)>(a)...
-    );
-  }
-  else
-  {
-    return r;
-  }
+    )
+  );
+
+  return r;
 }
 
 inline auto step(auto&& s) noexcept
