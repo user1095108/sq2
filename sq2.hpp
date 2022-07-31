@@ -148,8 +148,8 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
         [&]() noexcept
         {
           auto&& a(std::get<J>(t));
-          using B = std::remove_reference_t<decltype(a)>;
-          using A = std::remove_cv_t<B>;
+          using A = std::remove_reference_t<decltype(a)>;
+          using B = std::remove_cv_t<A>;
 
           if constexpr(std::is_same_v<std::nullptr_t, B>)
           {
