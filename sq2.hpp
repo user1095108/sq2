@@ -159,14 +159,7 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
             return r = sqlite3_bind_double(s, I + J, a);
           }
           else if constexpr(
-            std::is_integral_v<B> && (sizeof(a) <= sizeof(int))
-          )
-          {
-            return r = sqlite3_bind_int(s, I + J, a);
-          }
-          else if constexpr(
             std::is_integral_v<B> &&
-            (sizeof(a) > sizeof(int)) &&
             (sizeof(a) <= sizeof(sqlite3_int64))
           )
           {
