@@ -62,8 +62,7 @@ public:
   // increment, decrement
   auto& operator++() noexcept
   {
-    if (auto const r(sqlite3_step(s_));
-      (SQLITE_DONE == r) || (SQLITE_ROW != r))
+    if (SQLITE_ROW != sqlite3_step(s_))
     {
       s_ = {};
     }
