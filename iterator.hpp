@@ -98,7 +98,7 @@ public:
               >
             )
             {
-              return sqlite3_column_int(s_, I + J);
+              return sqlite3_column_int64(s_, I + J);
             }
             else if constexpr(
               std::is_same_v<
