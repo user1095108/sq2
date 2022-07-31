@@ -12,7 +12,7 @@ void print_tuple(auto&& t) noexcept
   [&]<auto ...I>(std::index_sequence<I...>) noexcept
   {
     (
-      [&]()
+      [&]() noexcept
       {
         if constexpr(I)
         {
