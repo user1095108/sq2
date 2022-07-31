@@ -3,6 +3,8 @@
 #include "sq2.hpp"
 
 using namespace sq2::literals;
+using namespace std::literals::string_literals;
+using namespace std::literals::string_view_literals;
 
 //////////////////////////////////////////////////////////////////////////////
 int main()
@@ -13,11 +15,13 @@ int main()
   );
 
   {
-    auto const s("SELECT ?/?"_sq2.unique(db));
-
+    auto s("SELECT ?/?"_sq2.unique(db));
     sq2::bind(s, 1., 3);
-
     std::cout << *sq2::range<double>(s).begin() << std::endl;
+
+    s = "SELECT ?"_sq2.unique(db);
+    sq2::bind(s, "lol");
+    std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
   }
 
   "DROP TABLE IF EXISTS COMPANY;"
