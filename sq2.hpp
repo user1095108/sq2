@@ -191,13 +191,13 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
           }
           else if constexpr(std::is_same_v<char*, A>)
           {
-            return r = sqlite3_bind_text64(s, I + J, a, -1, SQLITE_TRANSIENT,
-              SQLITE_UTF8);
+            return r = sqlite3_bind_text64(s, I + J, a, -1,
+              SQLITE_TRANSIENT, SQLITE_UTF8);
           }
           else if constexpr(std::is_same_v<char const*, A>)
           {
-            return r = sqlite3_bind_text64(s, I + J, a, -1, SQLITE_STATIC,
-              SQLITE_UTF8);
+            return r = sqlite3_bind_text64(s, I + J, a, -1,
+              SQLITE_STATIC, SQLITE_UTF8);
           }
           else if constexpr(std::is_same_v<std::string, A>)
           {
@@ -212,7 +212,7 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
           else if constexpr(std::is_same_v<std::string_view, B>)
           {
             return r = sqlite3_bind_text64(s, I + J, a.data(), a.size(),
-              SQLITE_STATIC, SQLITE_UTF8);
+              SQLITE_TRANSIENT, SQLITE_UTF8);
           }
         }() ||
         ...
