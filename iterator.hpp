@@ -76,7 +76,7 @@ public:
     using result_t = std::conditional_t<
       (sizeof...(A) > 1),
       std::tuple<A...>,
-      std::tuple_element_t<0, std::tuple<A...>>
+      std::tuple_element_t<{}, std::tuple<A...>>
     >;
 
     return [&]<auto ...J>(std::index_sequence<J...>) noexcept -> result_t
@@ -84,28 +84,15 @@ public:
         return {
           [&]() noexcept
           {
-            if constexpr(
-              std::is_floating_point_v<
-                std::tuple_element_t<J, std::tuple<A...>>
-              >
-            )
+            if constexpr(std::is_floating_point_v<A>)
             {
               return sqlite3_column_double(s_, I + J);
             }
-            else if constexpr(
-              std::is_integral_v<
-                std::tuple_element_t<J, std::tuple<A...>>
-              >
-            )
+            else if constexpr(std::is_integral_v<A>)
             {
               return sqlite3_column_int64(s_, I + J);
             }
-            else if constexpr(
-              std::is_same_v<
-                std::tuple_element_t<J, std::tuple<A...>>,
-                std::string_view
-              >
-            )
+            else if constexpr(std::is_same_v<A, std::string_view>)
             {
               return std::string_view(
                 reinterpret_cast<char const*>(sqlite3_column_text(s_, I + J)),
