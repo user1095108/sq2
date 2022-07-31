@@ -7,6 +7,33 @@ using namespace std::literals::string_literals;
 using namespace std::literals::string_view_literals;
 
 //////////////////////////////////////////////////////////////////////////////
+void print_tuple(auto&& t) noexcept
+{
+  [&]<auto ...I>(std::index_sequence<I...>) noexcept
+  {
+    (
+      [&]()
+      {
+        if constexpr(I > 0)
+        {
+          std::cout << ", ";
+        }
+
+        std::cout << std::get<I>(t);
+      }(),
+      ...
+    );
+
+    std::cout << '\n';
+  }
+  (
+    std::make_index_sequence<
+      std::tuple_size_v<std::remove_cvref_t<decltype(t)>>
+    >()
+  );
+}
+
+//////////////////////////////////////////////////////////////////////////////
 int main()
 {
   auto const db("example.db"_sq2.open_unique(
@@ -44,14 +71,7 @@ int main()
 
     sq2::range<std::string_view, int, std::string_view, double> const r(s);
 
-    for (auto&& t: r)
-    {
-      std::cout <<
-        std::get<0>(t) << " " <<
-        std::get<1>(t) << " " <<
-        std::get<2>(t) << " " << 
-        std::get<3>(t) << std::endl;
-    }
+    for (auto&& t: r) print_tuple(t);
 
     r.reset();
     std::cout << std::distance(r.begin(), r.end()) << std::endl;
