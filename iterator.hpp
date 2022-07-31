@@ -19,6 +19,8 @@ namespace sq2
 template <int I, typename ...A>
 class iterator
 {
+  static_assert(sizeof...(A));
+
 public:
   using iterator_category = std::forward_iterator_tag;
   using difference_type = std::uintmax_t;
@@ -73,41 +75,47 @@ public:
   // member access
   auto operator*() const noexcept
   {
-    using result_t = std::conditional_t<
-      (sizeof...(A) > 1),
-      std::tuple<A...>,
-      std::tuple_element_t<{}, std::tuple<A...>>
-    >;
-
-    return [&]<auto ...J>(std::index_sequence<J...>) noexcept -> result_t
+    auto const l([&]<auto J>() noexcept
       {
-        return {
-          [&]() noexcept
-          {
-            if constexpr(std::is_floating_point_v<A>)
-            {
-              return sqlite3_column_double(s_, I + J);
-            }
-            else if constexpr(std::is_integral_v<A>)
-            {
-              return sqlite3_column_int64(s_, I + J);
-            }
-            else if constexpr(std::is_same_v<A, std::string_view>)
-            {
-              return std::string_view(
-                reinterpret_cast<char const*>(sqlite3_column_text(s_, I + J)),
-                sqlite3_column_bytes(s_, I + J)
-              );
-            }
-          }()...
-        };
-      }(std::make_index_sequence<sizeof...(A)>());
+        using B = std::tuple_element_t<J, std::tuple<A...>>;
+
+        if constexpr(std::is_floating_point_v<B>)
+        {
+          return sqlite3_column_double(s_, I + J);
+        }
+        else if constexpr(std::is_integral_v<B>)
+        {
+          return sqlite3_column_int64(s_, I + J);
+        }
+        else if constexpr(std::is_same_v<B, std::string_view>)
+        {
+          return std::string_view(
+            reinterpret_cast<char const*>(sqlite3_column_text(s_, I + J)),
+            sqlite3_column_bytes(s_, I + J)
+          );
+        }
+      }
+    );
+
+    if constexpr(sizeof...(A) > 1)
+    {
+      return [&]<auto ...J>(std::index_sequence<J...>) noexcept
+        {
+          return std::tuple<A...>{l.template operator()<J>()...};
+        }(std::make_index_sequence<sizeof...(A)>());
+    }
+    else
+    {
+      return l.template operator()<0>();
+    }
   }
 };
 
 template <int I, typename ...A>
 class offset_range
 {
+  static_assert(sizeof...(A));
+
   sqlite3_stmt* const s_;
 
 public:
