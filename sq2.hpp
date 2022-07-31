@@ -140,14 +140,13 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
     s = stmt;
   }
 
-  return [&]<auto ...J>(auto&& t, std::index_sequence<J...>) noexcept
+  return [&]<auto ...J>(std::index_sequence<J...>) noexcept
     {
       int r;
 
       (
         [&]() noexcept
         {
-          auto&& a(std::get<J>(t));
           using A = std::remove_reference_t<decltype(a)>;
           using B = std::remove_cv_t<A>;
 
@@ -219,7 +218,7 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
       );
 
       return r;
-    }(std::forward_as_tuple(a...), std::make_index_sequence<sizeof...(a)>());
+    }(std::make_index_sequence<sizeof...(a)>());
 }
 
 inline auto changes(auto&& db) noexcept
