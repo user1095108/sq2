@@ -262,21 +262,6 @@ inline auto reset(auto&& s) noexcept
   }
 }
 
-inline auto rbind(auto&& s, auto&& ...a) noexcept
-{
-  int r;
-
-  (r = reset(std::forward<decltype(s)>(s))) ||
-  (
-    r = bind(
-      std::forward<decltype(s)>(s),
-      std::forward<decltype(a)>(a)...
-    )
-  );
-
-  return r;
-}
-
 inline auto step(auto&& s) noexcept
 {
   if constexpr(requires{s.get();})
