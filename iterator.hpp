@@ -27,7 +27,7 @@ public:
 
   using value_type = std::tuple<A...>;
   using pointer = value_type*;
-  using reference = value_type&;
+  using reference = value_type&&;
 
   sqlite3_stmt* s_;
 
