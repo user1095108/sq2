@@ -79,7 +79,7 @@ public:
   void operator++(int) noexcept { ++*this; }
 
   // member access
-  auto operator*() const
+  value_type operator*() const
   {
     auto const l([&]<auto J>()
       {
