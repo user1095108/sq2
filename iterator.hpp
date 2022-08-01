@@ -154,17 +154,8 @@ public:
   auto end() const noexcept { return iterator<I, A...>(); }
 
   //
-  auto clear_bindings() const noexcept
-  {
-    assert(s_);
-    return sqlite3_clear_bindings(s_);
-  }
-
-  auto reset() const noexcept
-  {
-    assert(s_);
-    return sqlite3_reset(s_);
-  }
+  auto clear_bindings() const noexcept { return sqlite3_clear_bindings(s_); }
+  auto reset() const noexcept { return sqlite3_reset(s_); }
 };
 
 template <typename ...A>
