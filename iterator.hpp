@@ -76,7 +76,7 @@ public:
     return *this;
   }
 
-  void operator++(int) noexcept { return operator++(); }
+  void operator++(int) noexcept { operator++(); }
 
   // member access
   auto operator*() const
@@ -115,6 +115,12 @@ public:
     {
       return l.template operator()<0>();
     }
+  }
+
+  //
+  auto row() const noexcept
+  {
+    return sqlite3_stmt_status(s_, SQLITE_STMTSTATUS_RUN, 0);
   }
 };
 
