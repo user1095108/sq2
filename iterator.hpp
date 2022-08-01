@@ -76,7 +76,7 @@ public:
     return *this;
   }
 
-  void operator++(int) noexcept { operator++(); }
+  void operator++(int) noexcept { ++*this; }
 
   // member access
   auto operator*() const
