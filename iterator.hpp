@@ -134,10 +134,7 @@ public:
   {
   }
 
-  offset_range(sqlite3_stmt* const s) noexcept:
-    s_{s}
-  {
-  }
+  offset_range(sqlite3_stmt* const s) noexcept: s_{s} { }
 
   offset_range(offset_range const&) = default;
   offset_range(offset_range&&) = default;
