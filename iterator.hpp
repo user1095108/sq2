@@ -25,7 +25,11 @@ public:
   using iterator_category = std::input_iterator_tag;
   using difference_type = std::intmax_t;
 
-  using value_type = std::tuple<A...>;
+  using value_type = std::conditional_t<
+      (sizeof...(A) > 1),
+      std::tuple<A...>,
+      std::tuple_element_t<0, std::tuple<A...>>
+    >;
   using pointer = value_type*;
   using reference = value_type&&;
 
@@ -72,7 +76,7 @@ public:
     return *this;
   }
 
-  auto& operator++(int) noexcept { return operator++(); }
+  void operator++(int) noexcept { return operator++(); }
 
   // member access
   auto operator*() const
