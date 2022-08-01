@@ -20,6 +20,7 @@ template <int I, typename ...A>
 class iterator
 {
   static_assert(sizeof...(A));
+  sqlite3_stmt* s_;
 
 public:
   using iterator_category = std::input_iterator_tag;
@@ -31,8 +32,6 @@ public:
       std::tuple_element_t<0, std::tuple<A...>>
     >;
   using reference = value_type const&;
-
-  sqlite3_stmt* s_;
 
 public:
   iterator() = default;
@@ -122,7 +121,6 @@ template <int I, typename ...A>
 class offset_range
 {
   static_assert(sizeof...(A));
-
   sqlite3_stmt* const s_;
 
 public:
