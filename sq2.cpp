@@ -70,12 +70,12 @@ int main()
   {
     auto const s("SELECT * FROM COMPANY"_sq2.unique(db));
 
-    using range = sq2::range<std::string, int, std::string, double>;
-    range const r(s);
+    using range_t = sq2::range<std::string, int, std::string, double>;
+    range_t const r(s);
     std::cout << std::distance(r.begin(), r.end()) << std::endl;
 
     //
-    std::list<range::iterator::value_type> l{r.begin(), r.end()};
+    std::list<range_t::iterator::value_type> l{r.begin(), r.end()};
     for (l.reverse(); auto&& t: l) print_tuple(t);
   }
 
