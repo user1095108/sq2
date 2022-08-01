@@ -82,10 +82,7 @@ int main()
 
     v.reverse();
 
-    for (auto&& t: v)
-    {
-      print_tuple(t);
-    }
+    for (auto&& t: v) print_tuple(t);
   }
 
   {
