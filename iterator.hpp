@@ -116,12 +116,6 @@ public:
       return l.template operator()<0>();
     }
   }
-
-  //
-  auto row() const noexcept
-  {
-    return sqlite3_stmt_status(s_, SQLITE_STMTSTATUS_RUN, 0);
-  }
 };
 
 template <int I, typename ...A>

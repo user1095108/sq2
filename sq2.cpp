@@ -74,6 +74,7 @@ int main()
 
     std::cout << std::distance(r.begin(), r.end()) << std::endl;
 
+    //
     std::list<decltype(r)::iterator_t::value_type> v;
 
     r.reset();
@@ -81,7 +82,10 @@ int main()
 
     v.reverse();
 
-    for (auto&& t: v) print_tuple(t);
+    for (auto&& t: v)
+    {
+      print_tuple(t);
+    }
   }
 
   {
