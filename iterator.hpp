@@ -29,8 +29,6 @@ public:
   using pointer = value_type*;
   using reference = value_type&;
 
-  using tuple_t = std::tuple<A...>;
-
   sqlite3_stmt* s_;
 
 public:
@@ -124,7 +122,7 @@ class offset_range
   sqlite3_stmt* const s_;
 
 public:
-  using tuple_t = std::tuple<A...>;
+  using iterator_t = iterator<I, A...>;
 
 public:
   offset_range(auto&& s) noexcept requires(requires{s.get();}):

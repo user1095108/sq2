@@ -74,7 +74,7 @@ int main()
 
     std::cout << std::distance(r.begin(), r.end()) << std::endl;
 
-    std::list<decltype(r)::tuple_t> v;
+    std::list<decltype(r)::iterator_t::value_type> v;
 
     r.reset();
     std::move(r.begin(), r.end(), std::back_inserter(v));
