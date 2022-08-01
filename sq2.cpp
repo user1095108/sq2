@@ -76,11 +76,10 @@ int main()
 
     //
     r.reset();
-    std::list<decltype(r)::iterator::value_type> v{r.begin(), r.end()};
 
-    v.reverse();
+    std::list<decltype(r)::iterator::value_type> l{r.begin(), r.end()};
 
-    for (auto&& t: v) print_tuple(t);
+    for (l.reverse(); auto&& t: l) print_tuple(t);
   }
 
   {
