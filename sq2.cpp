@@ -37,7 +37,7 @@ void print_tuple(auto&& t) noexcept
 //////////////////////////////////////////////////////////////////////////////
 int main()
 {
-  auto const db("example.db"_sq2.open_unique(
+  auto const db(":memory:"_sq2.open_unique(
       SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
     )
   );
@@ -52,7 +52,7 @@ int main()
     std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
   }
 
-  "DROP TABLE IF EXISTS COMPANY;"
+//"DROP TABLE IF EXISTS COMPANY;"
   "CREATE TABLE COMPANY("
   "NAME           TEXT    NOT NULL,"
   "AGE            INT     NOT NULL,"
