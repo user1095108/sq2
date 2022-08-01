@@ -150,7 +150,8 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
           using A = std::remove_reference_t<decltype(a)>;
           using B = std::remove_cv_t<A>;
 
-          if constexpr(std::is_same_v<std::nullptr_t, B>)
+          if constexpr(std::is_same_v<B, std::nullopt_t> ||
+            std::is_same_v<B, std::nullptr_t>)
           {
             return r = sqlite3_bind_null(s, I + J);
           }
@@ -167,7 +168,7 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
           }
           else if constexpr(
             (1 == std::rank_v<A>) &&
-            std::is_same_v<char, std::remove_extent_t<A>>
+            std::is_same_v<std::remove_extent_t<A>, char>
           )
           {
             return r = sqlite3_bind_text64(s, I + J, a, std::size(a) - 1,
@@ -175,33 +176,33 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
           }
           else if constexpr(
             (1 == std::rank_v<A>) &&
-            std::is_same_v<char const, std::remove_extent_t<A>>
+            std::is_same_v<std::remove_extent_t<A>, char const>
           )
           {
             return r = sqlite3_bind_text64(s, I + J, a, std::size(a) - 1,
               SQLITE_STATIC, SQLITE_UTF8);
           }
-          else if constexpr(std::is_same_v<char*, A>)
+          else if constexpr(std::is_same_v<A, char*>)
           {
             return r = sqlite3_bind_text64(s, I + J, a, -1,
               SQLITE_TRANSIENT, SQLITE_UTF8);
           }
-          else if constexpr(std::is_same_v<char const*, A>)
+          else if constexpr(std::is_same_v<A, char const*>)
           {
             return r = sqlite3_bind_text64(s, I + J, a, -1,
               SQLITE_STATIC, SQLITE_UTF8);
           }
-          else if constexpr(std::is_same_v<std::string, A>)
+          else if constexpr(std::is_same_v<A, std::string>)
           {
             return r = sqlite3_bind_text64(s, I + J, a.data(), a.size(),
               SQLITE_TRANSIENT, SQLITE_UTF8);
           }
-          else if constexpr(std::is_same_v<std::string const, A>)
+          else if constexpr(std::is_same_v<A, std::string const>)
           {
             return r = sqlite3_bind_text64(s, I + J, a.data(), a.size(),
               SQLITE_STATIC, SQLITE_UTF8);
           }
-          else if constexpr(std::is_same_v<std::string_view, B>)
+          else if constexpr(std::is_same_v<B, std::string_view>)
           {
             return r = sqlite3_bind_text64(s, I + J, a.data(), a.size(),
               SQLITE_TRANSIENT, SQLITE_UTF8);
