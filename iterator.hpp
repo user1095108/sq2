@@ -125,7 +125,7 @@ class offset_range
   sqlite3_stmt* const s_;
 
 public:
-  using iterator_t = iterator<I, A...>;
+  using iterator = sq2::iterator<I, A...>;
 
 public:
   offset_range(auto&& s) noexcept requires(requires{s.get();}):
@@ -146,8 +146,8 @@ public:
   bool operator==(offset_range const&) const noexcept = default;
 
   //
-  auto begin() const noexcept { return iterator<I, A...>(s_); }
-  auto end() const noexcept { return iterator<I, A...>(); }
+  auto begin() const noexcept { return iterator(s_); }
+  auto end() const noexcept { return iterator(); }
 
   //
   auto clear_bindings() const noexcept { return sqlite3_clear_bindings(s_); }

@@ -76,7 +76,7 @@ int main()
 
     //
     r.reset();
-    std::list<decltype(r)::iterator_t::value_type> v{r.begin(), r.end()};
+    std::list<decltype(r)::iterator::value_type> v{r.begin(), r.end()};
 
     v.reverse();
 
