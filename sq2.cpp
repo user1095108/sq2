@@ -1,4 +1,5 @@
 #include <iostream>
+#include <list>
 
 #include "sq2.hpp"
 
@@ -47,7 +48,7 @@ int main()
     std::cout << *sq2::range<double>(s).begin() << std::endl;
 
     s = "SELECT ?"_sq2.unique(db);
-    sq2::bind(s, "lol");
+    sq2::bind(s, "test");
     std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
   }
 
@@ -69,12 +70,18 @@ int main()
   {
     auto const s("SELECT * FROM COMPANY"_sq2.unique(db));
 
-    sq2::range<std::string_view, int, std::string_view, double> const r(s);
+    sq2::range<std::string, int, std::string, double> r(s);
 
-    for (auto&& t: r) print_tuple(t);
+    std::cout << std::distance(r.begin(), r.end()) << std::endl;
+
+    std::list<decltype(r)::tuple_t> v;
 
     r.reset();
-    std::cout << std::distance(r.begin(), r.end()) << std::endl;
+    std::move(r.begin(), r.end(), std::back_inserter(v));
+
+    v.reverse();
+
+    for (auto&& t: v) print_tuple(t);
   }
 
   {

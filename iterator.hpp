@@ -22,12 +22,14 @@ class iterator
   static_assert(sizeof...(A));
 
 public:
-  using iterator_category = std::forward_iterator_tag;
-  using difference_type = std::uintmax_t;
+  using iterator_category = std::input_iterator_tag;
+  using difference_type = std::intmax_t;
 
   using value_type = std::tuple<A...>;
   using pointer = value_type*;
   using reference = value_type&;
+
+  using tuple_t = std::tuple<A...>;
 
   sqlite3_stmt* s_;
 
@@ -72,10 +74,12 @@ public:
     return *this;
   }
 
+  auto& operator++(int) noexcept { return operator++(); }
+
   // member access
-  auto operator*() const noexcept
+  auto operator*() const
   {
-    auto const l([&]<auto J>() noexcept
+    auto const l([&]<auto J>()
       {
         using B = std::tuple_element_t<J, std::tuple<A...>>;
 
@@ -87,9 +91,10 @@ public:
         {
           return sqlite3_column_int64(s_, I + J);
         }
-        else if constexpr(std::is_same_v<B, std::string_view>)
+        else if constexpr(std::is_same_v<B, std::string> ||
+          (std::is_same_v<B, std::string_view>))
         {
-          return std::string_view(
+          return B(
             reinterpret_cast<char const*>(sqlite3_column_text(s_, I + J)),
             sqlite3_column_bytes(s_, I + J)
           );
@@ -117,6 +122,9 @@ class offset_range
   static_assert(sizeof...(A));
 
   sqlite3_stmt* const s_;
+
+public:
+  using tuple_t = std::tuple<A...>;
 
 public:
   offset_range(auto&& s) noexcept requires(requires{s.get();}):
