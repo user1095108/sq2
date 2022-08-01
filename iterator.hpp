@@ -30,8 +30,8 @@ public:
       std::tuple<A...>,
       std::tuple_element_t<0, std::tuple<A...>>
     >;
-  using pointer = value_type*;
-  using reference = value_type&&;
+  using pointer = value_type const*;
+  using reference = value_type const&;
 
   sqlite3_stmt* s_;
 
