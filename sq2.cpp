@@ -8,6 +8,13 @@ using namespace std::literals::string_literals;
 using namespace std::literals::string_view_literals;
 
 //////////////////////////////////////////////////////////////////////////////
+template <auto I>
+inline auto deserialize(auto const s, sq2::tag<char const*>) noexcept
+{
+  return reinterpret_cast<char const*>(sqlite3_column_text(s, I));
+}
+
+//////////////////////////////////////////////////////////////////////////////
 void print_tuple(auto&& t) noexcept
 {
   [&]<auto ...I>(std::index_sequence<I...>) noexcept
@@ -32,13 +39,6 @@ void print_tuple(auto&& t) noexcept
       std::tuple_size_v<std::remove_cvref_t<decltype(t)>>
     >()
   );
-}
-
-//////////////////////////////////////////////////////////////////////////////
-template <auto I>
-inline auto deserialize(auto const s, sq2::tag<char const*>) noexcept
-{
-  return reinterpret_cast<char const*>(sqlite3_column_text(s, I));
 }
 
 //////////////////////////////////////////////////////////////////////////////
