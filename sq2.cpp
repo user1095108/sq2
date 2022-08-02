@@ -35,6 +35,13 @@ void print_tuple(auto&& t) noexcept
 }
 
 //////////////////////////////////////////////////////////////////////////////
+template <auto I>
+inline auto deserialize(auto const s, sq2::tag<char const*>) noexcept
+{
+  return reinterpret_cast<char const*>(sqlite3_column_text(s, I));
+}
+
+//////////////////////////////////////////////////////////////////////////////
 int main()
 {
   auto const db(":memory:"_sq2.open_unique(
@@ -99,7 +106,7 @@ int main()
       "SELECT group_concat(rtrim(t),x'0a')FROM a"_sq2.unique(db)
     );
 
-    std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
+    std::cout << *sq2::range<char const*>(s).begin() << std::endl;
   }
 
   return 0;

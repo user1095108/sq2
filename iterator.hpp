@@ -17,6 +17,8 @@
 namespace sq2
 {
 
+template <typename> struct tag{};
+
 template <int I, typename ...A>
 class iterator
 {
@@ -100,6 +102,10 @@ public:
             reinterpret_cast<char const*>(sqlite3_column_text(s_, I + J)),
             sqlite3_column_bytes(s_, I + J)
           );
+        }
+        else
+        {
+          return deserialize<I + J>(s_, sq2::tag<B>{});
         }
       }
     );
