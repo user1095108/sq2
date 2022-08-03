@@ -24,10 +24,12 @@ void print_tuple(auto&& t) noexcept
       {
         if constexpr(I)
         {
-          std::cout << ", ";
+          std::cout << ", " << std::get<I>(t);
         }
-
-        std::cout << std::get<I>(t);
+        else
+        {
+          std::cout << std::get<I>(t);
+        }
       }(),
       ...
     );
