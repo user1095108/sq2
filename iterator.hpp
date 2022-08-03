@@ -83,7 +83,7 @@ public:
   // member access
   value_type operator*() const
   {
-    auto const l([&]<std::size_t J>()
+    auto const l([&]<int J>()
       {
         using B = std::tuple_element_t<J, std::tuple<A...>>;
 
