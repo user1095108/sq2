@@ -9,7 +9,7 @@ using namespace std::literals::string_view_literals;
 
 //////////////////////////////////////////////////////////////////////////////
 template <auto I>
-inline auto deserialize(auto const s, sq2::tag<char const*>) noexcept
+inline auto deserialize(sqlite3_stmt* const s, sq2::tag<char const*>) noexcept
 {
   return reinterpret_cast<char const*>(sqlite3_column_text(s, I));
 }
