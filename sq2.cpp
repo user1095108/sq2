@@ -1,5 +1,6 @@
 #include <iostream>
 #include <list>
+#include <ranges>
 
 #include "sq2.hpp"
 
@@ -84,7 +85,12 @@ int main()
 
     //
     std::list<decltype(*r.begin())> l{r.begin(), r.end()};
+
+#ifndef __clang__
+    for (auto&& t: l | std::views::reverse) print_tuple(t);
+#else
     for (l.reverse(); auto&& t: l) print_tuple(t);
+#endif // __clang__
   }
 
   {
