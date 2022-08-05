@@ -9,10 +9,15 @@ using namespace std::literals::string_literals;
 using namespace std::literals::string_view_literals;
 
 //////////////////////////////////////////////////////////////////////////////
+namespace sq2
+{
+
 template <int I>
-inline auto deserialize(sqlite3_stmt* const s, sq2::tag<char const*>) noexcept
+inline auto deserialize(sqlite3_stmt* const s, tag<char const*>) noexcept
 {
   return reinterpret_cast<char const*>(sqlite3_column_text(s, I));
+}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////
