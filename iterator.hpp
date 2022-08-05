@@ -107,7 +107,7 @@ public:
         }
         else
         {
-          return deserialize<I + J>(s_, sq2::tag<B>{});
+          return deserialize<I + J>(s_, tag<B>{});
         }
       }
     );
