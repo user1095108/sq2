@@ -19,8 +19,7 @@ namespace sq2
 
 template <typename> struct tag{};
 
-template <int, typename T>
-void deserialize(sqlite3_stmt*, tag<T>) = delete;
+template <int> void deserialize() = delete;
 
 template <int I, typename ...A>
 class iterator
