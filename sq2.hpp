@@ -100,14 +100,12 @@ template <int I = 1>
 inline auto bind(auto&& stmt, auto&& ...a) noexcept
   requires(bool(sizeof...(a)))
 {
-  return [&]<auto ...J>(std::index_sequence<J...>) noexcept
+  int r;
+
+  [&]<auto ...J>(std::index_sequence<J...>) noexcept
     {
-      int r;
-
-      auto const s(detail::get(stmt));
-
       (
-        [&]() noexcept
+        [&a, &r, s(detail::get(stmt))]() noexcept -> bool
         {
           using A = std::remove_reference_t<decltype(a)>;
           using B = std::remove_cv_t<A>;
@@ -169,12 +167,11 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
             return r = sqlite3_bind_text64(s, I + J, a.data(), a.size(),
               SQLITE_TRANSIENT, SQLITE_UTF8);
           }
-        }() ||
-        ...
+        }() || ...
       );
-
-      return r;
     }(std::make_index_sequence<sizeof...(a)>());
+
+  return r;
 }
 
 //
