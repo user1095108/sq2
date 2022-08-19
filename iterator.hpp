@@ -136,12 +136,11 @@ public:
   using iterator = sq2::iterator<I, A...>;
 
 public:
-  offset_range(auto&& s) noexcept requires(requires{s.get();}):
-    s_{s.get()}
+  offset_range(auto&& s) noexcept
+    requires(!std::is_same_v<offset_range, std::remove_cvref_t<decltype(s)>>):
+    s_{detail::get(s)}
   {
   }
-
-  offset_range(sqlite3_stmt* const s) noexcept: s_{s} { }
 
   offset_range(offset_range const&) = default;
   offset_range(offset_range&&) = default;

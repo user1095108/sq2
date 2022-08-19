@@ -73,7 +73,8 @@ struct maker
   {
     sqlite3_stmt* s;
 
-    auto const r(sqlite3_prepare_v3(detail::get(db), s_.data(), s_.size(), fl, &s, {}));
+    auto const r(sqlite3_prepare_v3(detail::get(db), s_.data(), s_.size(),
+      fl, &s, {}));
     assert(SQLITE_OK == r);
 
     return SQLITE_OK == r ?
@@ -101,9 +102,9 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
 {
   return [&]<auto ...J>(std::index_sequence<J...>) noexcept
     {
-      auto const s(detail::get(stmt));
-
       int r;
+
+      auto const s(detail::get(stmt));
 
       (
         [&]() noexcept
