@@ -17,6 +17,16 @@
 namespace sq2
 {
 
+namespace detail
+{
+
+inline auto get(auto&& s) noexcept
+{
+  if constexpr(requires{s.get();}) return s.get(); else return s;
+}
+
+}
+
 template <typename> struct tag{};
 
 template <int I, typename ...A>
@@ -42,17 +52,9 @@ public:
   iterator(auto&& s) noexcept
     requires(
       !std::is_same_v<iterator, std::remove_cvref_t<decltype(s)>>
-    )
+    ):
+    s_{detail::get(s)}
   {
-    if constexpr(requires{s.get();})
-    {
-      s_ = s.get();
-    }
-    else
-    {
-      s_ = s;
-    }
-
     ++*this;
   }
 

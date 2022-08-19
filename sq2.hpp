@@ -48,14 +48,7 @@ struct maker
 
   auto exec(auto&& db) && noexcept
   {
-    if constexpr(requires{db.get();})
-    {
-      return sqlite3_exec(db.get(), s_.data(), {}, {}, {});
-    }
-    else
-    {
-      return sqlite3_exec(db, s_.data(), {}, {}, {});
-    }
+    return sqlite3_exec(detail::get(db), s_.data(), {}, {}, {});
   }
 
   auto open_shared(int const fl = {}, char const* const zvfs = {}) && noexcept
@@ -80,46 +73,23 @@ struct maker
   {
     sqlite3_stmt* s;
 
-    if constexpr(requires{db.get();})
-    {
-      auto const r(sqlite3_prepare_v3(db.get(), s_.data(), s_.size(),
-        fl, &s, {}));
-      assert(SQLITE_OK == r);
+    auto const r(sqlite3_prepare_v3(detail::get(db), s_.data(), s_.size(), fl, &s, {}));
+    assert(SQLITE_OK == r);
 
-      return SQLITE_OK == r ?
-        shared_stmt_t(s, detail::sqlite3_stmt_deleter()) :
-        shared_stmt_t();
-    }
-    else
-    {
-      auto const r(sqlite3_prepare_v3(db, s_.data(), s_.size(), fl, &s, {}));
-      assert(SQLITE_OK == r);
-
-      return SQLITE_OK == r ?
-        shared_stmt_t(s, detail::sqlite3_stmt_deleter()) :
-        shared_stmt_t();
-    }
+    return SQLITE_OK == r ?
+      shared_stmt_t(s, detail::sqlite3_stmt_deleter()) :
+      shared_stmt_t();
   }
 
   auto unique(auto&& db, unsigned const fl = {}) && noexcept
   {
     sqlite3_stmt* s;
 
-    if constexpr(requires{db.get();})
-    {
-      auto const r(sqlite3_prepare_v3(db.get(), s_.data(), s_.size(), fl, &s,
-        {}));
-      assert(SQLITE_OK == r);
+    auto const r(sqlite3_prepare_v3(detail::get(db), s_.data(), s_.size(),
+      fl, &s, {}));
+    assert(SQLITE_OK == r);
 
-      return SQLITE_OK == r ? unique_stmt_t(s) : unique_stmt_t();
-    }
-    else
-    {
-      auto const r(sqlite3_prepare_v3(db, s_.data(), s_.size(), fl, &s, {}));
-      assert(SQLITE_OK == r);
-
-      return SQLITE_OK == r ? unique_stmt_t(s) : unique_stmt_t();
-    }
+    return SQLITE_OK == r ? unique_stmt_t(s) : unique_stmt_t();
   }
 };
 
@@ -129,19 +99,10 @@ template <int I = 1>
 inline auto bind(auto&& stmt, auto&& ...a) noexcept
   requires(bool(sizeof...(a)))
 {
-  sqlite3_stmt* s;
-
-  if constexpr(requires{stmt.get();})
-  {
-    s = stmt.get();
-  }
-  else
-  {
-    s = stmt;
-  }
-
   return [&]<auto ...J>(std::index_sequence<J...>) noexcept
     {
+      auto const s(detail::get(stmt));
+
       int r;
 
       (
@@ -215,65 +176,24 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
     }(std::make_index_sequence<sizeof...(a)>());
 }
 
+//
 inline auto changes(auto&& db) noexcept
 {
-  if constexpr(requires{db.get();})
-  {
-    return sqlite3_changes64(db.get());
-  }
-  else
-  {
-    return sqlite3_changes64(db);
-  }
+  return sqlite3_changes64(detail::get(db));
 }
 
 inline auto clear_bindings(auto&& s) noexcept
 {
-  if constexpr(requires{s.get();})
-  {
-    return sqlite3_clear_bindings(s.get());
-  }
-  else
-  {
-    return sqlite3_clear_bindings(s);
-  }
+  return sqlite3_clear_bindings(detail::get(s));
 }
 
 inline auto column_count(auto&& s) noexcept
 {
-  if constexpr(requires{s.get();})
-  {
-    return sqlite3_column_count(s.get());
-  }
-  else
-  {
-    return sqlite3_column_count(s);
-  }
+  return sqlite3_column_count(detail::get(s));
 }
 
-inline auto reset(auto&& s) noexcept
-{
-  if constexpr(requires{s.get();})
-  {
-    return sqlite3_reset(s.get());
-  }
-  else
-  {
-    return sqlite3_reset(s);
-  }
-}
-
-inline auto step(auto&& s) noexcept
-{
-  if constexpr(requires{s.get();})
-  {
-    return sqlite3_step(s.get());
-  }
-  else
-  {
-    return sqlite3_step(s);
-  }
-}
+inline auto reset(auto&& s) noexcept { return sqlite3_reset(detail::get(s)); }
+inline auto step(auto&& s) noexcept { return sqlite3_step(detail::get(s)); }
 
 namespace literals
 {
