@@ -85,7 +85,7 @@ public:
   // member access
   value_type operator*() const
   {
-    auto const l([&]<int J>()
+    auto const l([&]<int J>() noexcept
       {
         using B = std::tuple_element_t<J, std::tuple<A...>>;
 

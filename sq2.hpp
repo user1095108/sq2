@@ -171,7 +171,7 @@ inline auto bind(auto&& s, auto&& ...a) noexcept
           }
           else
           {
-            return r = serialize<I + J>(detail::get(s),
+            return r = user_bind<I + J>(detail::get(s),
               std::forward<decltype(a)>(a), tag<A>{});
           }
         }() || ...
