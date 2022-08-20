@@ -111,8 +111,10 @@ inline auto bind(auto&& s, auto&& ...a) noexcept
           using A = std::remove_reference_t<decltype(a)>;
           using B = std::remove_cv_t<A>;
 
-          if constexpr(std::is_same_v<B, std::nullopt_t> ||
-            std::is_same_v<B, std::nullptr_t>)
+          if constexpr(
+            std::is_same_v<B, std::nullopt_t> ||
+            std::is_same_v<B, std::nullptr_t>
+          )
           {
             return r = sqlite3_bind_null(detail::get(s), I + J);
           }
@@ -121,8 +123,7 @@ inline auto bind(auto&& s, auto&& ...a) noexcept
             return r = sqlite3_bind_double(detail::get(s), I + J, a);
           }
           else if constexpr(
-            std::is_integral_v<B> &&
-            (sizeof(a) <= sizeof(sqlite3_int64))
+            std::is_integral_v<B> && (sizeof(a) <= sizeof(sqlite3_int64))
           )
           {
             return r = sqlite3_bind_int64(detail::get(s), I + J, a);
