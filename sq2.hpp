@@ -97,15 +97,16 @@ struct maker
 }
 
 template <int I = 1>
-inline auto bind(auto&& stmt, auto&& ...a) noexcept
+inline auto bind(auto&& s, auto&& ...a) noexcept
   requires(bool(sizeof...(a)))
 {
-  int r;
-
-  [&]<auto ...J>(std::index_sequence<J...>) noexcept
+  return [&]<auto ...J>(std::index_sequence<J...>) noexcept
     {
+      int r;
+
       (
-        [&a, &r, s(detail::get(stmt))]() noexcept -> bool
+        //[&a, &r, &s]() noexcept -> bool // uncomment for bug
+        [&]() noexcept -> bool
         {
           using A = std::remove_reference_t<decltype(a)>;
           using B = std::remove_cv_t<A>;
@@ -113,65 +114,65 @@ inline auto bind(auto&& stmt, auto&& ...a) noexcept
           if constexpr(std::is_same_v<B, std::nullopt_t> ||
             std::is_same_v<B, std::nullptr_t>)
           {
-            return r = sqlite3_bind_null(s, I + J);
+            return r = sqlite3_bind_null(detail::get(s), I + J);
           }
           else if constexpr(std::is_floating_point_v<B>)
           {
-            return r = sqlite3_bind_double(s, I + J, a);
+            return r = sqlite3_bind_double(detail::get(s), I + J, a);
           }
           else if constexpr(
             std::is_integral_v<B> &&
             (sizeof(a) <= sizeof(sqlite3_int64))
           )
           {
-            return r = sqlite3_bind_int64(s, I + J, a);
+            return r = sqlite3_bind_int64(detail::get(s), I + J, a);
           }
           else if constexpr(
             (1 == std::rank_v<A>) &&
             std::is_same_v<std::remove_extent_t<A>, char>
           )
           {
-            return r = sqlite3_bind_text64(s, I + J, a, std::size(a) - 1,
-              SQLITE_TRANSIENT, SQLITE_UTF8);
+            return r = sqlite3_bind_text64(detail::get(s), I + J,
+              a, std::size(a) - 1, SQLITE_TRANSIENT, SQLITE_UTF8);
           }
           else if constexpr(
             (1 == std::rank_v<A>) &&
             std::is_same_v<std::remove_extent_t<A>, char const>
           )
           {
-            return r = sqlite3_bind_text64(s, I + J, a, std::size(a) - 1,
-              SQLITE_STATIC, SQLITE_UTF8);
+            return r = sqlite3_bind_text64(detail::get(s), I + J,
+              a, std::size(a) - 1, SQLITE_STATIC, SQLITE_UTF8);
           }
           else if constexpr(std::is_same_v<A, char*>)
           {
-            return r = sqlite3_bind_text64(s, I + J, a, -1,
-              SQLITE_TRANSIENT, SQLITE_UTF8);
+            return r = sqlite3_bind_text64(detail::get(s), I + J,
+              a, -1, SQLITE_TRANSIENT, SQLITE_UTF8);
           }
           else if constexpr(std::is_same_v<A, char const*>)
           {
-            return r = sqlite3_bind_text64(s, I + J, a, -1,
-              SQLITE_STATIC, SQLITE_UTF8);
+            return r = sqlite3_bind_text64(detail::get(s), I + J,
+              a, -1, SQLITE_STATIC, SQLITE_UTF8);
           }
           else if constexpr(std::is_same_v<A, std::string>)
           {
-            return r = sqlite3_bind_text64(s, I + J, a.data(), a.size(),
-              SQLITE_TRANSIENT, SQLITE_UTF8);
+            return r = sqlite3_bind_text64(detail::get(s), I + J,
+              a.data(), a.size(), SQLITE_TRANSIENT, SQLITE_UTF8);
           }
           else if constexpr(std::is_same_v<A, std::string const>)
           {
-            return r = sqlite3_bind_text64(s, I + J, a.data(), a.size(),
-              SQLITE_STATIC, SQLITE_UTF8);
+            return r = sqlite3_bind_text64(detail::get(s), I + J,
+              a.data(), a.size(), SQLITE_STATIC, SQLITE_UTF8);
           }
           else if constexpr(std::is_same_v<B, std::string_view>)
           {
-            return r = sqlite3_bind_text64(s, I + J, a.data(), a.size(),
-              SQLITE_TRANSIENT, SQLITE_UTF8);
+            return r = sqlite3_bind_text64(detail::get(s), I + J,
+              a.data(), a.size(), SQLITE_TRANSIENT, SQLITE_UTF8);
           }
         }() || ...
       );
-    }(std::make_index_sequence<sizeof...(a)>());
 
-  return r;
+      return r;
+    }(std::make_index_sequence<sizeof...(a)>());
 }
 
 //
