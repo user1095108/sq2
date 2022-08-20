@@ -107,7 +107,7 @@ public:
         }
         else
         {
-          return deserialize<I + J>(s_, tag<B>{});
+          return user_deref<I + J>(s_, tag<B>{});
         }
       }
     );

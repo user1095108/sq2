@@ -13,7 +13,7 @@ namespace sq2
 {
 
 template <int I>
-inline auto deserialize(sqlite3_stmt* const s, tag<char const*>) noexcept
+inline auto user_deref(sqlite3_stmt* const s, tag<char const*>) noexcept
 {
   return reinterpret_cast<char const*>(sqlite3_column_text(s, I));
 }
