@@ -169,6 +169,11 @@ inline auto bind(auto&& s, auto&& ...a) noexcept
             return r = sqlite3_bind_text64(detail::get(s), I + J,
               a.data(), a.size(), SQLITE_TRANSIENT, SQLITE_UTF8);
           }
+          else
+          {
+            return r = serialize<I + J>(detail::get(s),
+              std::forward<decltype(a)>(a), tag<A>{});
+          }
         }() || ...
       );
 
