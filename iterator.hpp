@@ -20,9 +20,16 @@ namespace sq2
 namespace detail
 {
 
-inline auto get(auto&& s) noexcept
+inline decltype(auto) get(auto&& s) noexcept
 {
-  if constexpr(requires{s.get();}) return s.get(); else return s;
+  if constexpr(requires{s.get();})
+  {
+    return s.get();
+  }
+  else
+  {
+    return std::forward<decltype(s)>(s);
+  }
 }
 
 }
