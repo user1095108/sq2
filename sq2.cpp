@@ -86,10 +86,10 @@ int main()
     auto const s("SELECT * FROM COMPANY"_sq2.unique(db));
 
     sq2::range<std::string, int, std::string, double> const r(s);
-    std::cout << std::distance(r.begin(), r.end()) << std::endl;
+    std::cout << std::distance(r.begin(), {}) << std::endl;
 
     //
-    std::list<decltype(*r.begin())> l{r.begin(), r.end()};
+    std::list<decltype(*r.begin())> l{r.begin(), {}};
 
 #ifndef __clang__
     for (auto&& t: l | std::views::reverse) print_tuple(t);
