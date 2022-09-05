@@ -21,7 +21,7 @@ inline auto user_deref(sqlite3_stmt* const s, tag<char const*>) noexcept
 }
 
 //////////////////////////////////////////////////////////////////////////////
-void print_tuple(auto&& t) noexcept
+void print_tuple(auto const& t) noexcept
 {
   [&]<auto ...I>(std::index_sequence<I...>) noexcept
   {
