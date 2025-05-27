@@ -102,6 +102,11 @@ public:
         {
           return sqlite3_column_int64(s_, I + J);
         }
+        else if constexpr(std::is_same_v<B, char const*>)
+        {
+          return
+            reinterpret_cast<char const*>(sqlite3_column_text(s_, I + J));
+        }
         else if constexpr(std::is_same_v<B, std::string> ||
           (std::is_same_v<B, std::string_view>))
         {

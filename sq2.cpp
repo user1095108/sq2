@@ -9,18 +9,6 @@ using namespace std::literals::string_literals;
 using namespace std::literals::string_view_literals;
 
 //////////////////////////////////////////////////////////////////////////////
-namespace sq2
-{
-
-template <int I>
-inline auto user_deref(sqlite3_stmt* const s, tag<char const*>) noexcept
-{
-  return reinterpret_cast<char const*>(sqlite3_column_text(s, I));
-}
-
-}
-
-//////////////////////////////////////////////////////////////////////////////
 void print_tuple(auto const& t)
 {
   [&]<auto ...I>(std::index_sequence<I...>)
@@ -119,7 +107,7 @@ int main()
       "SELECT group_concat(rtrim(t),x'0a')FROM a"_sq2.unique(db)
     );
 
-    std::cout << *sq2::range<char const*>(s).begin() << std::endl;
+    std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
   }
 
   return 0;
