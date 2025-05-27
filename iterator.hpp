@@ -20,15 +20,15 @@ namespace detail
 {
 
 inline decltype(auto) get(auto&& s) noexcept
+  requires(std::is_pointer_v<std::remove_reference_t<decltype(s)>>)
 {
-  if constexpr(requires{s.get();})
-  {
-    return s.get();
-  }
-  else
-  {
-    return std::forward<decltype(s)>(s);
-  }
+  return std::forward<decltype(s)>(s);
+}
+
+inline decltype(auto) get(auto&& s) noexcept(noexcept(s.get()))
+  requires(requires{s.get();})
+{
+  return s.get();
 }
 
 }
