@@ -166,18 +166,7 @@ public:
   auto reset() const noexcept { return sqlite3_reset(s_); }
 };
 
-template <typename ...A>
-class range : public offset_range<0, A...>
-{
-public:
-  using offset_range<0, A...>::offset_range;
-
-  range& operator=(range const&) = default;
-  range& operator=(range&&) = default;
-
-  //
-  bool operator==(range const&) const = default;
-};
+template <typename ...A> using range = offset_range<0, A...>;
 
 }
 
