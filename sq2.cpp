@@ -89,23 +89,19 @@ int main()
   {
     auto const s(
       "WITH RECURSIVE\n"
-      "xaxis(x)AS(VALUES(-2.0)UNION ALL SELECT x+0.05 FROM xaxis WHERE x<1.2),"
-      "yaxis(y)AS(VALUES(-1.0)UNION ALL SELECT y+0.1 FROM yaxis WHERE y<1.0),"
+      "xaxis(x)AS(VALUES(-1.3)UNION ALL SELECT x+0.033 FROM xaxis WHERE x<1.3),"
+      "yaxis(y)AS(VALUES(-1.15)UNION ALL SELECT y+0.096 FROM yaxis WHERE y<1.15),"
       "m(iter,cx,cy,x,y)AS("
-      "SELECT 0,x,y,0.0,0.0 FROM xaxis,yaxis\n"
+      "SELECT 0,x,y,x,y FROM xaxis,yaxis\n"
       "UNION ALL\n"
-      "SELECT iter+1,cx,cy,x*x-y*y+cx,2.0*x*y+cy FROM m\n"
+      "SELECT iter+1,cx,cy,x*x-y*y+0.0,2.0*x*y-0.8 FROM m\n"
       "WHERE(x*x+y*y)<4.0 AND iter<28"
-      "),"
-      "m2(iter,cx,cy)AS("
-      "SELECT max(iter),cx,cy FROM m GROUP BY cx,cy"
-      "),"
-      "a(t)AS("
-      "SELECT group_concat(substr(' .+*#',1+min(iter/7,4),1),'')"
-      "FROM m2 GROUP BY cy"
       ")"
-      "SELECT group_concat(rtrim(t),x'0a')FROM a"_sq2.unique(db)
-    );
+      "SELECT group_concat(line, x'0a')FROM("
+      "SELECT group_concat(ch, '') AS line FROM("
+      "SELECT cy,substr(' .+*#', 1 + min(max(iter)/7, 4), 1) AS ch FROM m\n"
+      "GROUP BY cx,cy ORDER BY cy DESC,cx ASC)"
+      "GROUP BY cy)"_sq2.unique(db));
 
     std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
   }
