@@ -21,12 +21,12 @@ inline auto user_deref(sqlite3_stmt* const s, tag<char const*>) noexcept
 }
 
 //////////////////////////////////////////////////////////////////////////////
-void print_tuple(auto const& t) noexcept
+void print_tuple(auto const& t)
 {
-  [&]<auto ...I>(std::index_sequence<I...>) noexcept
+  [&]<auto ...I>(std::index_sequence<I...>)
   {
     (
-      [&]() noexcept
+      [&]()
       {
         if constexpr(I)
         {
@@ -88,11 +88,10 @@ int main()
     sq2::range<std::string, int, std::string, double> const r(s);
     std::cout << std::distance(r.begin(), {}) << std::endl;
 
-    //
-    std::list<decltype(*r.begin())> l{r.begin(), {}};
+    for (auto const& t: std::list<decltype(*r.begin())>{r.begin(), {}} |
+      std::views::reverse) print_tuple(t);
 
-    //for (l.reverse(); auto const& t: l) print_tuple(t);
-    for (auto const& t: l | std::views::reverse) print_tuple(t);
+    for (auto const& t: r) print_tuple(t);
   }
 
   {
