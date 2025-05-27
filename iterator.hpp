@@ -36,6 +36,7 @@ inline decltype(auto) get(auto&& s) noexcept(noexcept(s.get()))
 template <typename> struct tag{};
 
 template <int I, typename ...A>
+  requires(bool(sizeof...(A)) && !(std::is_reference_v<A> || ...))
 class iterator
 {
   static_assert(sizeof...(A));
@@ -131,9 +132,9 @@ public:
 };
 
 template <int I, typename ...A>
+  requires(bool(sizeof...(A)) && !(std::is_reference_v<A> || ...))
 class offset_range
 {
-  static_assert(sizeof...(A));
   sqlite3_stmt* s_;
 
 public:
