@@ -116,63 +116,54 @@ inline auto bind(auto&& s, auto&& ...a) noexcept
             std::is_same_v<B, std::nullptr_t>
           )
           {
-            return r = sqlite3_bind_null(detail::get(s), I + J);
+            return (r = sqlite3_bind_null(detail::get(s), I + J));
           }
           else if constexpr(std::is_floating_point_v<B>)
           {
-            return r = sqlite3_bind_double(detail::get(s), I + J, a);
+            return (r = sqlite3_bind_double(detail::get(s), I + J, a));
           }
           else if constexpr(
             std::is_integral_v<B> && (sizeof(a) <= sizeof(sqlite3_int64))
           )
           {
-            return r = sqlite3_bind_int64(detail::get(s), I + J, a);
+            return (r = sqlite3_bind_int64(detail::get(s), I + J, a));
           }
           else if constexpr(
             (1 == std::rank_v<A>) &&
             std::is_same_v<std::remove_extent_t<A>, char>
           )
           {
-            return r = sqlite3_bind_text64(detail::get(s), I + J,
-              a, std::size(a) - 1, SQLITE_TRANSIENT, SQLITE_UTF8);
+            return (r = sqlite3_bind_text64(detail::get(s), I + J,
+              a, std::size(a) - 1, SQLITE_TRANSIENT, SQLITE_UTF8));
           }
           else if constexpr(
             (1 == std::rank_v<A>) &&
             std::is_same_v<std::remove_extent_t<A>, char const>
           )
           {
-            return r = sqlite3_bind_text64(detail::get(s), I + J,
-              a, std::size(a) - 1, SQLITE_STATIC, SQLITE_UTF8);
+            return (r = sqlite3_bind_text64(detail::get(s), I + J,
+              a, std::size(a) - 1, SQLITE_STATIC, SQLITE_UTF8));
           }
           else if constexpr(std::is_same_v<A, char*>)
           {
-            return r = sqlite3_bind_text64(detail::get(s), I + J,
-              a, -1, SQLITE_TRANSIENT, SQLITE_UTF8);
+            return (r = sqlite3_bind_text64(detail::get(s), I + J,
+              a, -1, SQLITE_TRANSIENT, SQLITE_UTF8));
           }
           else if constexpr(std::is_same_v<A, char const*>)
           {
-            return r = sqlite3_bind_text64(detail::get(s), I + J,
-              a, -1, SQLITE_STATIC, SQLITE_UTF8);
+            return (r = sqlite3_bind_text64(detail::get(s), I + J,
+              a, -1, SQLITE_STATIC, SQLITE_UTF8));
           }
-          else if constexpr(std::is_same_v<A, std::string>)
+          else if constexpr(std::is_same_v<B, std::string> ||
+            std::is_same_v<B, std::string_view>)
           {
-            return r = sqlite3_bind_text64(detail::get(s), I + J,
-              a.data(), a.size(), SQLITE_TRANSIENT, SQLITE_UTF8);
-          }
-          else if constexpr(std::is_same_v<A, std::string const>)
-          {
-            return r = sqlite3_bind_text64(detail::get(s), I + J,
-              a.data(), a.size(), SQLITE_STATIC, SQLITE_UTF8);
-          }
-          else if constexpr(std::is_same_v<B, std::string_view>)
-          {
-            return r = sqlite3_bind_text64(detail::get(s), I + J,
-              a.data(), a.size(), SQLITE_TRANSIENT, SQLITE_UTF8);
+            return (r = sqlite3_bind_text64(detail::get(s), I + J,
+              a.data(), a.size(), SQLITE_TRANSIENT, SQLITE_UTF8));
           }
           else
           {
-            return r = user_bind<I + J>(detail::get(s),
-              std::forward<decltype(a)>(a), tag<A>{});
+            return (r = user_bind<I + J>(detail::get(s),
+              std::forward<decltype(a)>(a), tag<A>{}));
           }
         }() || ...
       );
@@ -203,7 +194,7 @@ inline auto step(auto&& s) noexcept { return sqlite3_step(detail::get(s)); }
 namespace literals
 {
 
-inline auto operator "" _sq2(char const* const s, std::size_t const N)
+inline auto operator ""_sq2(char const* const s, std::size_t const N)
   noexcept
 {
   return detail::maker{{s, N}};

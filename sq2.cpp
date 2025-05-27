@@ -91,11 +91,8 @@ int main()
     //
     std::list<decltype(*r.begin())> l{r.begin(), {}};
 
-#ifndef __clang__
-    for (auto&& t: l | std::views::reverse) print_tuple(t);
-#else
-    for (l.reverse(); auto&& t: l) print_tuple(t);
-#endif // __clang__
+    //for (l.reverse(); auto const& t: l) print_tuple(t);
+    for (auto const& t: l | std::views::reverse) print_tuple(t);
   }
 
   {
