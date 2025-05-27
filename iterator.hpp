@@ -57,9 +57,7 @@ public:
   iterator() = default;
 
   iterator(auto&& s) noexcept(noexcept(detail::get(s)))
-    requires(
-      !std::is_same_v<iterator, std::remove_cvref_t<decltype(s)>>
-    ):
+    requires(!std::is_same_v<iterator, std::remove_cvref_t<decltype(s)>>):
     s_{detail::get(s)}
   {
     ++*this;

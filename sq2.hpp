@@ -39,63 +39,6 @@ using unique_stmt_t = std::unique_ptr<
   detail::sqlite3_stmt_deleter
 >;
 
-namespace detail
-{
-
-struct maker
-{
-  std::string_view const s_;
-
-  auto exec(auto&& db) && noexcept
-  {
-    return sqlite3_exec(detail::get(db), s_.data(), {}, {}, {});
-  }
-
-  auto open_shared(int const fl = {}, char const* const zvfs = {}) && noexcept
-  {
-    sqlite3* db;
-
-    return SQLITE_OK == sqlite3_open_v2(s_.data(), &db, fl, zvfs) ?
-      shared_db_t(db, detail::sqlite3_db_deleter()) :
-      (detail::sqlite3_db_deleter()(db), shared_db_t());
-  }
-
-  auto open_unique(int const fl = {}, char const* const zvfs = {}) && noexcept
-  {
-    sqlite3* db;
-
-    return SQLITE_OK == sqlite3_open_v2(s_.data(), &db, fl, zvfs) ?
-      unique_db_t(db) :
-      (detail::sqlite3_db_deleter()(db), unique_db_t());
-  }
-
-  auto shared(auto&& db, unsigned const fl = {}) && noexcept
-  {
-    sqlite3_stmt* s;
-
-    auto const r(sqlite3_prepare_v3(detail::get(db), s_.data(), s_.size(),
-      fl, &s, {}));
-    assert(SQLITE_OK == r);
-
-    return SQLITE_OK == r ?
-      shared_stmt_t(s, detail::sqlite3_stmt_deleter()) :
-      shared_stmt_t();
-  }
-
-  auto unique(auto&& db, unsigned const fl = {}) && noexcept
-  {
-    sqlite3_stmt* s;
-
-    auto const r(sqlite3_prepare_v3(detail::get(db), s_.data(), s_.size(),
-      fl, &s, {}));
-    assert(SQLITE_OK == r);
-
-    return SQLITE_OK == r ? unique_stmt_t(s) : unique_stmt_t();
-  }
-};
-
-}
-
 template <int I = 1>
 inline auto bind(auto&& s, auto&& ...a) noexcept
   requires(bool(sizeof...(a)))
@@ -190,6 +133,64 @@ inline auto column_count(auto&& s) noexcept
 
 inline auto reset(auto&& s) noexcept { return sqlite3_reset(detail::get(s)); }
 inline auto step(auto&& s) noexcept { return sqlite3_step(detail::get(s)); }
+
+//
+namespace detail
+{
+
+struct maker
+{
+  std::string_view const s_;
+
+  auto exec(auto&& db) && noexcept
+  {
+    return sqlite3_exec(detail::get(db), s_.data(), {}, {}, {});
+  }
+
+  auto open_shared(int const fl = {}, char const* const zvfs = {}) && noexcept
+  {
+    sqlite3* db;
+
+    return SQLITE_OK == sqlite3_open_v2(s_.data(), &db, fl, zvfs) ?
+      shared_db_t(db, detail::sqlite3_db_deleter()) :
+      (detail::sqlite3_db_deleter()(db), shared_db_t());
+  }
+
+  auto open_unique(int const fl = {}, char const* const zvfs = {}) && noexcept
+  {
+    sqlite3* db;
+
+    return SQLITE_OK == sqlite3_open_v2(s_.data(), &db, fl, zvfs) ?
+      unique_db_t(db) :
+      (detail::sqlite3_db_deleter()(db), unique_db_t());
+  }
+
+  auto shared(auto&& db, unsigned const fl = {}) && noexcept
+  {
+    sqlite3_stmt* s;
+
+    auto const r(sqlite3_prepare_v3(detail::get(db), s_.data(), s_.size(),
+      fl, &s, {}));
+    assert(SQLITE_OK == r);
+
+    return SQLITE_OK == r ?
+      shared_stmt_t(s, detail::sqlite3_stmt_deleter()) :
+      shared_stmt_t();
+  }
+
+  auto unique(auto&& db, unsigned const fl = {}) && noexcept
+  {
+    sqlite3_stmt* s;
+
+    auto const r(sqlite3_prepare_v3(detail::get(db), s_.data(), s_.size(),
+      fl, &s, {}));
+    assert(SQLITE_OK == r);
+
+    return SQLITE_OK == r ? unique_stmt_t(s) : unique_stmt_t();
+  }
+};
+
+}
 
 namespace literals
 {
