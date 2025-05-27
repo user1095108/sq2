@@ -88,10 +88,9 @@ int main()
     sq2::range<std::string, int, std::string, double> const r(s);
     std::cout << std::distance(r.begin(), {}) << std::endl;
 
+    for (auto const& t: r) print_tuple(t);
     for (auto const& t: std::list<decltype(*r.begin())>{r.begin(), {}} |
       std::views::reverse) print_tuple(t);
-
-    for (auto const& t: r) print_tuple(t);
   }
 
   {
