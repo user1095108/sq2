@@ -134,7 +134,7 @@ template <int I, typename ...A>
 class offset_range
 {
   static_assert(sizeof...(A));
-  sqlite3_stmt* const s_;
+  sqlite3_stmt* s_;
 
 public:
   using iterator = sq2::iterator<I, A...>;
@@ -154,7 +154,7 @@ public:
   offset_range& operator=(offset_range&&) = default;
 
   //
-  bool operator==(offset_range const&) const noexcept = default;
+  bool operator==(offset_range const&) const = default;
 
   //
   auto begin() const noexcept { return iterator(s_); }
@@ -171,8 +171,11 @@ class range : public offset_range<0, A...>
 public:
   using offset_range<0, A...>::offset_range;
 
-  using offset_range<0, A...>::operator=;
-  using offset_range<0, A...>::operator==;
+  range& operator=(range const&) = default;
+  range& operator=(range&&) = default;
+
+  //
+  bool operator==(range const&) const = default;
 };
 
 }

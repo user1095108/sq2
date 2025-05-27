@@ -83,14 +83,19 @@ int main()
   "VALUES('Mark', 25, 'Rich-Mond ', 65000.00)"_sq2.exec(db);
 
   {
-    auto const s("SELECT * FROM COMPANY"_sq2.unique(db));
+    auto s("SELECT * FROM COMPANY"_sq2.unique(db));
 
-    sq2::range<std::string, int, std::string, double> const r(s);
+    sq2::range<std::string, int, std::string, double> r(s);
     std::cout << std::distance(r.begin(), {}) << std::endl;
 
     for (auto const& t: r) print_tuple(t);
-    for (auto const& t: std::list<decltype(*r.begin())>{r.begin(), {}} |
-      std::views::reverse) print_tuple(t);
+
+    r = s = "SELECT * FROM("
+      "SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rn\n"
+      "FROM (SELECT * FROM COMPANY)) ORDER BY rn DESC"_sq2.unique(db);
+    for (auto const& t: r) print_tuple(t);
+    //for (auto const& t: std::list<decltype(*r.begin())>{r.begin(), {}} |
+    //  std::views::reverse) print_tuple(t);
   }
 
   {
