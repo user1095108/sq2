@@ -78,9 +78,9 @@ int main()
 
     for (auto const& t: r) print_tuple(t);
 
-    r = s = "SELECT * FROM("
+    r = s = "SELECT * FROM ("
       "SELECT *, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rn\n"
-      "FROM (SELECT * FROM COMPANY)) ORDER BY rn DESC"_sq2.unique(db);
+      "FROM COMPANY ORDER BY rn DESC)"_sq2.unique(db);
     for (auto const& t: r) print_tuple(t);
     //for (auto const& t: std::list<decltype(*r.begin())>{r.begin(), {}} |
     //  std::views::reverse) print_tuple(t);
