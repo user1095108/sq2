@@ -125,7 +125,7 @@ int main()
       "    WHEN r < 0.93 THEN 0.23 * x + 0.22 * y + 1.6"
       "    ELSE 0.26 * x + 0.24 * y + 0.44"
       "  END\n"
-      "FROM fern, (SELECT (random() + 1 + 9223372036854775807) / 18446744073709551616.0 AS r)\n"
+      "FROM fern, (SELECT (random() + 1 + 9223372036854775807) / 18446744073709551615.0 AS r)\n"
       "WHERE iter < 10000),"
       "scaled AS ("
       "SELECT"
