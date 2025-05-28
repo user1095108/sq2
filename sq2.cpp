@@ -166,6 +166,5 @@ int main()
     std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
   }
 
-
   return 0;
 }
