@@ -5,7 +5,6 @@
 #include <cassert>
 #include <cstdint>
 #include <memory>
-#include <string>
 #include <string_view>
 #include <tuple>
 #include <type_traits>
@@ -90,7 +89,7 @@ public:
   // member access
   value_type operator*() const
   {
-    auto const l([&]<int J>() noexcept
+    auto const l([&]<int J>()
       {
         using B = std::tuple_element_t<J, std::tuple<A...>>;
 
@@ -107,8 +106,7 @@ public:
           return
             reinterpret_cast<char const*>(sqlite3_column_text(s_, I + J));
         }
-        else if constexpr(std::is_same_v<B, std::string> ||
-          (std::is_same_v<B, std::string_view>))
+        else if constexpr(std::is_same_v<B, std::string_view>)
         {
           return B(
             reinterpret_cast<char const*>(sqlite3_column_text(s_, I + J)),
@@ -124,7 +122,7 @@ public:
 
     if constexpr(sizeof...(A) > 1)
     {
-      return [&]<auto ...J>(std::index_sequence<J...>) noexcept
+      return [&]<auto ...J>(std::index_sequence<J...>)
         {
           return std::tuple<A...>{l.template operator()<J>()...};
         }(std::make_index_sequence<sizeof...(A)>());

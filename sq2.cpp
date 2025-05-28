@@ -14,7 +14,6 @@
 #include "sq2.hpp"
 
 using namespace sq2::literals;
-using namespace std::literals::string_literals;
 using namespace std::literals::string_view_literals;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -104,7 +103,7 @@ int main()
   {
     auto s("SELECT * FROM COMPANY"_sq2.unique(db));
 
-    sq2::range<std::string, int, std::string, double> r(s);
+    sq2::range<std::string_view, int, std::string_view, double> r(s);
     std::cout << std::distance(r.begin(), {}) << std::endl;
 
     for (auto const& t: r) print_tuple(t);
