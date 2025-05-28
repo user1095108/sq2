@@ -1,3 +1,12 @@
+#if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#define VC_EXTRALEAN
+#include <windows.h>
+#else
+#include <sys/ioctl.h> //ioctl() and TIOCGWINSZ
+#include <unistd.h> // for STDOUT_FILENO
+#endif
+
 #include <iostream>
 #include <list>
 #include <ranges>
@@ -40,10 +49,32 @@ void print_tuple(auto const& t)
 //////////////////////////////////////////////////////////////////////////////
 int main()
 {
-  auto const db(":memory:"_sq2.open_unique(
-      SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
-    )
-  );
+  int w, h;
+
+  {
+    #if defined(_WIN32)
+      auto const handle(GetStdHandle(STD_OUTPUT_HANDLE));
+
+      if (DWORD mode; GetConsoleMode(handle, &mode))
+      {
+        SetConsoleMode(handle, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+      }
+
+      CONSOLE_SCREEN_BUFFER_INFO csbi;
+      GetConsoleScreenBufferInfo(handle, &csbi);
+      w = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+      h = csbi.srWindow.Bottom - csbi.srWindow.Top;
+    #else
+      struct winsize ws;
+      ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
+
+      w = ws.ws_col;
+      h = ws.ws_row - 1;
+    #endif
+  }
+
+  auto const db(":memory:"_sq2.open_unique(SQLITE_OPEN_READWRITE |
+    SQLITE_OPEN_CREATE));
 
   {
     auto s("SELECT ?/?"_sq2.unique(db));
@@ -88,19 +119,21 @@ int main()
   {
     auto const s(
       "WITH RECURSIVE\n"
-      "xaxis(x)AS(VALUES(-1.3)UNION ALL SELECT x+0.033 FROM xaxis WHERE x<1.3),"
-      "yaxis(y)AS(VALUES(-1.15)UNION ALL SELECT y+0.096 FROM yaxis WHERE y<1.15),"
+      "xaxis(x)AS(VALUES(-1.3)UNION ALL SELECT x+?1 FROM xaxis WHERE x<1.3),"
+      "yaxis(y)AS(VALUES(-1.15)UNION ALL SELECT y+?2 FROM yaxis WHERE y<1.15),"
       "m(iter,cx,cy,x,y)AS("
       "SELECT 0,x,y,x,y FROM xaxis,yaxis\n"
       "UNION ALL\n"
       "SELECT iter+1,cx,cy,x*x-y*y+0.0,2.0*x*y-0.8 FROM m\n"
       "WHERE(x*x+y*y)<4.0 AND iter<28"
       ")"
-      "SELECT group_concat(line, x'0a')FROM("
+      "SELECT group_concat(line, '\n')FROM("
       "SELECT group_concat(ch, '') AS line FROM("
       "SELECT cy,substr(' .+*#', 1 + min(max(iter)/7, 4), 1) AS ch FROM m\n"
       "GROUP BY cx,cy ORDER BY cy DESC,cx ASC)"
       "GROUP BY cy)"_sq2.unique(db));
+
+    sq2::bind(s, 2.6 / (w - 2), 2.3 / h);
 
     std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
   }
@@ -129,12 +162,12 @@ int main()
       "WHERE iter < 10000),"
       "scaled(x, y) AS ("
       "SELECT"
-      "  ROUND((x + 2.1820) / (2.6558 + 2.1820) * 79),"
-      "  ROUND((9.9983 - y) / (9.9983 - 0.0) * 24)\n"
+      "  ROUND((x + 2.1820) / (2.6558 + 2.1820) * ?1),"
+      "  ROUND((9.9983 - y) / (9.9983 - 0.0) * ?2)"
       "FROM fern),"
       "dedup AS (SELECT DISTINCT x,y FROM scaled),"
-      "xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x <= 79),"
-      "yseq(y) AS (VALUES(0) UNION ALL SELECT y + 1 FROM yseq WHERE y <= 24),"
+      "xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x <= ?1),"
+      "yseq(y) AS (VALUES(0) UNION ALL SELECT y + 1 FROM yseq WHERE y <= ?2),"
       "grid AS ("
       "  SELECT"
       "    xseq.x,"
@@ -154,6 +187,8 @@ int main()
       "  GROUP BY y"
       ")"
       "SELECT group_concat(line, '\n') FROM ordered_grid"_sq2.unique(db));
+
+    sq2::bind(s, w - 2, h - 1);
 
     std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
   }
