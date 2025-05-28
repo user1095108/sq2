@@ -105,5 +105,40 @@ int main()
     std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
   }
 
+  {
+    auto const s(
+      "WITH RECURSIVE\n"
+      "fern(iter, x, y) AS ("
+      "SELECT 0, 0.0, 0.0\n"
+      "UNION ALL\n"
+      "SELECT\n"
+      "  iter + 1,\n"
+      "  CASE\n"
+      "    WHEN r < 0.01 THEN 0.0\n"
+      "    WHEN r < 0.86 THEN 0.85 * x + 0.04 * y\n"
+      "    WHEN r < 0.93 THEN 0.20 * x - 0.26 * y\n"
+      "    ELSE -0.15 * x + 0.28 * y\n"
+      "  END,\n"
+      "  CASE\n"
+      "    WHEN r < 0.01 THEN 0.16 * y\n"
+      "    WHEN r < 0.86 THEN -0.04 * x + 0.85 * y + 1.6\n"
+      "    WHEN r < 0.93 THEN 0.23 * x + 0.22 * y + 1.6\n"
+      "    ELSE 0.26 * x + 0.24 * y + 0.44\n"
+      "  END\n"
+      "FROM fern, (SELECT abs(random() % 100) / 100.0 AS r)\n"
+      "WHERE iter < 10000),"
+      "scaled AS ("
+      "SELECT\n"
+      "  ROUND((x + 2.1820) / (2.6558 + 2.1820) * 79) AS x,"
+      "  ROUND((9.9983 - y) / (9.9983 - 0.0) * 24) AS y\n"
+      "FROM fern),"
+      "dedup AS (SELECT DISTINCT x,y FROM scaled)\n"
+      "SELECT group_concat(ansi_seq, '')FROM("
+      "SELECT printf('\x1b[%d;%dH#', y + 1, x + 1 + 80) AS ansi_seq FROM dedup)"_sq2.unique(db));
+
+    std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
+  }
+
+
   return 0;
 }
