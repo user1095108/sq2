@@ -144,9 +144,7 @@ public:
         }(std::make_integer_sequence<int, sizeof...(A)>());
     }
     else
-    {
       return user_deref<0>(s_, tag<value_type>{});
-    }
   }
 };
 
