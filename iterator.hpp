@@ -76,7 +76,7 @@ inline T user_deref(sqlite3_stmt* const s, tag<T>) noexcept
   );
 }
 
-template <int I, typename ...A>
+template <typename ...A>
   requires(bool(sizeof...(A)) && !(std::is_reference_v<A> || ...))
 class iterator
 {
@@ -132,12 +132,12 @@ public:
   {
     if constexpr(sizeof...(A) > 1)
     {
-      return [&]<int ...J>(std::integer_sequence<int, J...>)
+      return [&]<int ...I>(std::integer_sequence<int, I...>)
         {
           return std::tuple<A...>{
-              user_deref<I + J>(
+              user_deref<I>(
                 s_,
-                tag<std::tuple_element_t<J, std::tuple<A...>>>{}
+                tag<std::tuple_element_t<I, std::tuple<A...>>>{}
               )...
             };
         }(std::make_integer_sequence<int, sizeof...(A)>());
@@ -145,35 +145,51 @@ public:
     else
       return user_deref<0>(s_, tag<value_type>{});
   }
+
+  template <int ...I> requires(sizeof...(I) >= 1)
+  value_type operator*() const
+  {
+    if constexpr(sizeof...(I) > 1)
+    {
+      return std::tuple{
+          user_deref<I>(
+            s_,
+            tag<std::tuple_element_t<I, std::tuple<A...>>>{}
+          )...
+        };
+    }
+    else
+      return user_deref<(I, ...)>(s_, tag<value_type>{});
+  }
 };
 
-template <int I, typename ...A>
+template <typename ...A>
   requires(bool(sizeof...(A)) && !(std::is_reference_v<A> || ...))
-class offset_range
+class range
 {
   sqlite3_stmt* s_;
 
 public:
-  using iterator = sq2::iterator<I, A...>;
+  using iterator = sq2::iterator<A...>;
 
 public:
-  offset_range() = default;
+  range() = default;
 
-  offset_range(auto&& s) noexcept
-    requires(!std::is_same_v<offset_range, std::remove_cvref_t<decltype(s)>>):
+  range(auto&& s) noexcept
+    requires(!std::is_same_v<range, std::remove_cvref_t<decltype(s)>>):
     s_{detail::get(s)}
   {
   }
 
-  offset_range(offset_range const&) = default;
-  offset_range(offset_range&&) = default;
+  range(range const&) = default;
+  range(range&&) = default;
 
   //
-  offset_range& operator=(offset_range const&) = default;
-  offset_range& operator=(offset_range&&) = default;
+  range& operator=(range const&) = default;
+  range& operator=(range&&) = default;
 
   //
-  bool operator==(offset_range const&) const = default;
+  bool operator==(range const&) const = default;
 
   //
   auto begin() const noexcept { return iterator(s_); }
@@ -183,8 +199,6 @@ public:
   auto clear_bindings() const noexcept { return sqlite3_clear_bindings(s_); }
   auto reset() const noexcept { return sqlite3_reset(s_); }
 };
-
-template <typename ...A> using range = offset_range<0, A...>;
 
 }
 
