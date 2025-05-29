@@ -39,6 +39,67 @@ using unique_stmt_t = std::unique_ptr<
   detail::sqlite3_stmt_deleter
 >;
 
+template <int I>
+inline auto user_bind(auto&& s, auto&& a) noexcept
+  requires(std::is_same_v<std::remove_cvref_t<decltype(a)>, std::nullopt_t> ||
+    std::is_same_v<std::remove_cvref_t<decltype(a)>, std::nullptr_t>)
+{
+  return sqlite3_bind_null(detail::get(s), I);
+}
+
+template <int I>
+inline auto user_bind(auto&& s, auto&& a) noexcept
+  requires(std::is_floating_point_v<std::remove_reference_t<decltype(a)>>)
+{
+  return sqlite3_bind_double(detail::get(s), I, a);
+}
+
+template <int I>
+inline auto user_bind(auto&& s, auto&& a) noexcept
+  requires(std::is_integral_v<std::remove_reference_t<decltype(a)>>)
+{
+  return sqlite3_bind_int64(detail::get(s), I, a);
+}
+
+template <int I, std::size_t N>
+inline auto user_bind(auto&& s, char (&a)[N]) noexcept
+{
+  return sqlite3_bind_text64(detail::get(s), I, a, N - 1, SQLITE_TRANSIENT,
+    SQLITE_UTF8);
+}
+
+template <int I, std::size_t N>
+inline auto user_bind(auto&& s, char const (&a)[N]) noexcept
+{
+  return sqlite3_bind_text64(detail::get(s), I, a, N - 1, SQLITE_STATIC,
+    SQLITE_UTF8);
+}
+
+template <int I>
+inline auto user_bind(auto&& s, auto&& a) noexcept
+  requires(std::is_same_v<std::remove_reference_t<decltype(a)>, char*>)
+{
+  return sqlite3_bind_text64(detail::get(s), I, a, -1, SQLITE_TRANSIENT,
+    SQLITE_UTF8);
+}
+
+template <int I>
+inline auto user_bind(auto&& s, auto&& a) noexcept
+  requires(std::is_same_v<std::remove_reference_t<decltype(a)>, char const*>)
+{
+  return sqlite3_bind_text64(detail::get(s), I, a, -1, SQLITE_STATIC,
+    SQLITE_UTF8);
+}
+
+template <int I>
+inline auto user_bind(auto&& s, auto&& a) noexcept
+  requires(std::is_same_v<std::remove_cvref_t<decltype(a)>, std::string> ||
+    std::is_same_v<std::remove_cvref_t<decltype(a)>, std::string_view>)
+{
+  return sqlite3_bind_text64(detail::get(s), I, a.data(), a.size(),
+    SQLITE_TRANSIENT, SQLITE_UTF8);
+}
+
 template <int ...I> requires(bool(sizeof...(I)))
 inline auto bind(auto&& s, auto&& ...a) noexcept
   requires(sizeof...(a) == sizeof...(I))
@@ -48,63 +109,7 @@ inline auto bind(auto&& s, auto&& ...a) noexcept
   (
     [&]() noexcept -> bool
     {
-      using A = std::remove_reference_t<decltype(a)>;
-      using B = std::remove_cv_t<A>;
-
-      if constexpr(
-        std::is_same_v<B, std::nullopt_t> ||
-        std::is_same_v<B, std::nullptr_t>
-      )
-      {
-        return (r = sqlite3_bind_null(detail::get(s), I));
-      }
-      else if constexpr(std::is_floating_point_v<B>)
-      {
-        return (r = sqlite3_bind_double(detail::get(s), I, a));
-      }
-      else if constexpr(
-        std::is_integral_v<B> && (sizeof(a) <= sizeof(sqlite3_int64))
-      )
-      {
-        return (r = sqlite3_bind_int64(detail::get(s), I, a));
-      }
-      else if constexpr(
-        (1 == std::rank_v<A>) &&
-        std::is_same_v<std::remove_extent_t<A>, char>
-      )
-      {
-        return (r = sqlite3_bind_text64(detail::get(s), I,
-          a, std::size(a) - 1, SQLITE_TRANSIENT, SQLITE_UTF8));
-      }
-      else if constexpr(
-        (1 == std::rank_v<A>) &&
-        std::is_same_v<std::remove_extent_t<A>, char const>
-      )
-      {
-        return (r = sqlite3_bind_text64(detail::get(s), I,
-          a, std::size(a) - 1, SQLITE_STATIC, SQLITE_UTF8));
-      }
-      else if constexpr(std::is_same_v<A, char*>)
-      {
-        return (r = sqlite3_bind_text64(detail::get(s), I,
-          a, -1, SQLITE_TRANSIENT, SQLITE_UTF8));
-      }
-      else if constexpr(std::is_same_v<A, char const*>)
-      {
-        return (r = sqlite3_bind_text64(detail::get(s), I,
-          a, -1, SQLITE_STATIC, SQLITE_UTF8));
-      }
-      else if constexpr(std::is_same_v<B, std::string> ||
-        std::is_same_v<B, std::string_view>)
-      {
-        return (r = sqlite3_bind_text64(detail::get(s), I,
-          a.data(), a.size(), SQLITE_TRANSIENT, SQLITE_UTF8));
-      }
-      else
-      {
-        return (r = user_bind<I>(detail::get(s),
-          std::forward<decltype(a)>(a), tag<A>{}));
-      }
+      return (r = user_bind<I>(detail::get(s), std::forward<decltype(a)>(a)));
     }() || ...
   );
 

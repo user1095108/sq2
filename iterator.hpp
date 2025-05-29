@@ -35,6 +35,47 @@ inline decltype(auto) get(auto&& s) noexcept(noexcept(s.get()))
 
 template <typename> struct tag{};
 
+template <int I, typename T>
+inline T user_deref(sqlite3_stmt* const s, tag<T>) noexcept
+  requires(std::is_floating_point_v<T>)
+{
+  return sqlite3_column_double(s, I);
+}
+
+template <int I, typename T>
+inline T user_deref(sqlite3_stmt* const s, tag<T>) noexcept
+  requires(std::is_integral_v<T>)
+{
+  return sqlite3_column_int64(s, I);
+}
+
+template <int I, typename T>
+inline T user_deref(sqlite3_stmt* const s, tag<T>) noexcept
+  requires(std::is_same_v<T, char const*>)
+{
+  return reinterpret_cast<char const*>(sqlite3_column_text(s, I));
+}
+
+template <int I, typename T>
+inline T user_deref(sqlite3_stmt* const s, tag<T>)
+  requires(std::is_same_v<T, std::string>)
+{
+  return T(
+    reinterpret_cast<char const*>(sqlite3_column_text(s, I)),
+    sqlite3_column_bytes(s, I)
+  );
+}
+
+template <int I, typename T>
+inline T user_deref(sqlite3_stmt* const s, tag<T>) noexcept
+  requires(std::is_same_v<T, std::string_view>)
+{
+  return T(
+    reinterpret_cast<char const*>(sqlite3_column_text(s, I)),
+    sqlite3_column_bytes(s, I)
+  );
+}
+
 template <int I, typename ...A>
   requires(bool(sizeof...(A)) && !(std::is_reference_v<A> || ...))
 class iterator
@@ -94,31 +135,7 @@ public:
       {
         using B = std::tuple_element_t<J, std::tuple<A...>>;
 
-        if constexpr(std::is_floating_point_v<B>)
-        {
-          return sqlite3_column_double(s_, I + J);
-        }
-        else if constexpr(std::is_integral_v<B>)
-        {
-          return sqlite3_column_int64(s_, I + J);
-        }
-        else if constexpr(std::is_same_v<B, char const*>)
-        {
-          return
-            reinterpret_cast<char const*>(sqlite3_column_text(s_, I + J));
-        }
-        else if constexpr(std::is_same_v<B, std::string> ||
-          std::is_same_v<B, std::string_view>)
-        {
-          return B(
-            reinterpret_cast<char const*>(sqlite3_column_text(s_, I + J)),
-            sqlite3_column_bytes(s_, I + J)
-          );
-        }
-        else
-        {
-          return user_deref<I + J>(s_, tag<B>{});
-        }
+        return user_deref<I + J>(s_, tag<B>{});
       }
     );
 
