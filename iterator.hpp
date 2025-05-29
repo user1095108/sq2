@@ -131,24 +131,21 @@ public:
   // member access
   value_type operator*() const
   {
-    auto const l([&]<int J>()
-      {
-        using B = std::tuple_element_t<J, std::tuple<A...>>;
-
-        return user_deref<I + J>(s_, tag<B>{});
-      }
-    );
-
     if constexpr(sizeof...(A) > 1)
     {
-      return [&]<auto ...J>(std::index_sequence<J...>)
+      return [&]<int ...J>(std::integer_sequence<int, J...>)
         {
-          return std::tuple<A...>{l.template operator()<J>()...};
-        }(std::make_index_sequence<sizeof...(A)>());
+          return std::tuple<A...>{
+              user_deref<I + J>(
+                s_,
+                tag<std::tuple_element_t<J, std::tuple<A...>>>{}
+              )...
+            };
+        }(std::make_integer_sequence<int, sizeof...(A)>());
     }
     else
     {
-      return l.template operator()<0>();
+      return user_deref<0>(s_, tag<value_type>{});
     }
   }
 };
