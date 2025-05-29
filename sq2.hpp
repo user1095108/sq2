@@ -48,7 +48,6 @@ inline auto bind(auto&& s, auto&& ...a) noexcept
       int r;
 
       (
-        //[&a, &r, &s]() noexcept -> bool // uncomment for bug
         [&]() noexcept -> bool
         {
           using A = std::remove_reference_t<decltype(a)>;
@@ -113,6 +112,22 @@ inline auto bind(auto&& s, auto&& ...a) noexcept
 
       return r;
     }(std::make_index_sequence<sizeof...(a)>());
+}
+
+template <int ...I> requires(sizeof...(I) > 1)
+inline auto bind(auto&& s, auto&& ...a) noexcept
+  requires(sizeof...(a) == sizeof...(I))
+{
+  int r;
+
+  (
+    [&]() noexcept -> bool
+    {
+      return (r = bind<I>(s, std::forward<decltype(a)>(a)));
+    }() || ...
+  );
+
+  return r;
 }
 
 //

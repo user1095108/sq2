@@ -144,7 +144,7 @@ int main()
       "GROUP BY cx,cy ORDER BY cy DESC,cx ASC)"
       "GROUP BY cy)"_sq2.unique(db));
 
-    sq2::bind(s, 2.6 / (w - 2), 2.3 / h);
+    sq2::bind<1, 2>(s, 2.6 / (w - 2), 2.3 / h);
 
     std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
   }
