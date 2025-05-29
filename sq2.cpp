@@ -17,6 +17,18 @@ using namespace sq2::literals;
 using namespace std::literals::string_view_literals;
 
 //////////////////////////////////////////////////////////////////////////////
+namespace sq2
+{
+
+template <int I>
+inline float user_deref(sqlite3_stmt* const s, tag<float>) noexcept
+{
+  return sqlite3_column_double(s, I);
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////////////
 void print_tuple(auto const& t)
 {
   [&]<auto ...I>(std::index_sequence<I...>)
