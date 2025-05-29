@@ -138,13 +138,13 @@ int main()
       "SELECT iter+1,cx,cy,x*x-y*y+0.0,2.0*x*y-0.8 FROM m\n"
       "WHERE(x*x+y*y)<4.0 AND iter<28"
       ")"
-      "SELECT group_concat(line, '')FROM("
+      "SELECT group_concat(line, '\n')FROM("
       "SELECT group_concat(ch, '') AS line FROM("
       "SELECT cy,substr(' .+*#', 1 + min(max(iter)/7, 4), 1) AS ch FROM m\n"
       "GROUP BY cx,cy ORDER BY cy DESC,cx)"
       "GROUP BY cy)"_sq2.unique(db));
 
-    sq2::bind<1, 2>(s, 2.6 / (w - 1), 2.3 / h);
+    sq2::bind<1, 2>(s, 2.6 / (w - 2), 2.3 / h);
 
     std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
   }
