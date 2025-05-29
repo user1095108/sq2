@@ -80,7 +80,6 @@ template <int I, typename ...A>
   requires(bool(sizeof...(A)) && !(std::is_reference_v<A> || ...))
 class iterator
 {
-  static_assert(sizeof...(A));
   sqlite3_stmt* s_;
 
 public:
