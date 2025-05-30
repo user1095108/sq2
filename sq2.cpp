@@ -113,6 +113,8 @@ int main()
     for (auto const& t: r) print_tuple(t);
     //for (auto const& t: std::list<decltype(*r.begin())>{r.begin(), {}} |
     //  std::views::reverse) print_tuple(t);
+
+    for (auto i(r.begin<0, 2>()); i != r.end(); ++i) print_tuple(*i);
   }
 
   {

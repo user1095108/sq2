@@ -76,10 +76,11 @@ inline T user_deref(sqlite3_stmt* const s, tag<T>) noexcept
   );
 }
 
-template <typename ...A>
-  requires(bool(sizeof...(A)) && !(std::is_reference_v<A> || ...))
+template <typename Tuple, int ...I>
 class iterator
 {
+  template <typename, int ...> friend class iterator;
+
   sqlite3_stmt* s_;
 
 public:
@@ -87,9 +88,9 @@ public:
   using difference_type = std::intmax_t;
 
   using value_type = std::conditional_t<
-      (sizeof...(A) > 1),
-      std::tuple<A...>,
-      std::tuple_element_t<0, std::tuple<A...>>
+      (std::tuple_size_v<Tuple> > 1),
+      Tuple,
+      std::tuple_element_t<0, Tuple>
     >;
   using reference = value_type const&;
 
@@ -111,7 +112,11 @@ public:
   iterator& operator=(iterator&&) = default;
 
   //
-  bool operator==(iterator const& o) const noexcept = default;
+  template <int ...J>
+  bool operator==(iterator<Tuple, J...> const& o) const noexcept
+  {
+    return s_ == o.s_;
+  }
 
   // increment, decrement
   auto& operator++() noexcept
@@ -128,38 +133,33 @@ public:
   void operator++(int) noexcept { ++*this; }
 
   // member access
-  value_type operator*() const
-  {
-    if constexpr(sizeof...(A) > 1)
-    {
-      return [&]<int ...I>(std::integer_sequence<int, I...>)
-        {
-          return std::tuple<A...>{
-              user_deref<I>(
-                s_,
-                tag<std::tuple_element_t<I, std::tuple<A...>>>{}
-              )...
-            };
-        }(std::make_integer_sequence<int, sizeof...(A)>());
-    }
-    else
-      return user_deref<0>(s_, tag<value_type>{});
-  }
-
-  template <int ...I> requires(sizeof...(I) >= 1)
-  value_type operator*() const
+  auto operator*() const
   {
     if constexpr(sizeof...(I) > 1)
     {
       return std::tuple{
           user_deref<I>(
             s_,
-            tag<std::tuple_element_t<I, std::tuple<A...>>>{}
+            tag<std::tuple_element_t<I, Tuple>>{}
           )...
         };
     }
-    else
+    else if constexpr(1 == sizeof...(I))
       return user_deref<(I, ...)>(s_, tag<value_type>{});
+    else if constexpr(std::tuple_size_v<Tuple> > 1)
+    {
+      return [&]<int ...J>(std::integer_sequence<int, J...>)
+        {
+          return std::tuple{
+              user_deref<J>(
+                s_,
+                tag<std::tuple_element_t<J, Tuple>>{}
+              )...
+            };
+        }(std::make_integer_sequence<int, std::tuple_size_v<Tuple>>());
+    }
+    else
+      return user_deref<0>(s_, tag<value_type>{});
   }
 };
 
@@ -170,7 +170,7 @@ class range
   sqlite3_stmt* s_;
 
 public:
-  using iterator = sq2::iterator<A...>;
+  using tuple_t = std::tuple<A...>;
 
 public:
   range() = default;
@@ -192,8 +192,9 @@ public:
   bool operator==(range const&) const = default;
 
   //
-  auto begin() const noexcept { return iterator(s_); }
-  auto end() const noexcept { return iterator(); }
+  template <int ...I>
+  auto begin() const noexcept { return iterator<tuple_t, I...>(s_); }
+  auto end() const noexcept { return iterator<tuple_t>(); }
 
   //
   auto clear_bindings() const noexcept { return sqlite3_clear_bindings(s_); }
