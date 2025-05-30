@@ -34,7 +34,7 @@ inline decltype(auto) get(auto&& s) noexcept(noexcept(s.get()))
 }
 
 template <int ...I>
-using integer_sequence = std::integer_sequence<int, I...>;
+using i = std::integer_sequence<int, I...>;
 
 template <typename> struct tag{};
 
