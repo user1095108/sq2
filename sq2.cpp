@@ -103,7 +103,7 @@ int main()
   {
     auto s("SELECT * FROM COMPANY"_sq2.unique(db));
 
-    auto r(sq2::make_range<std::string_view, int, std::string_view, double>(s, std::integer_sequence<int, 2, 0>{}));
+    auto r(sq2::make_range<std::string_view, int, std::string_view, double>(s, sq2::integer_sequence<2, 0>{}));
     std::cout << std::distance(r.begin(), {}) << std::endl;
 
     for (auto const& t: r) print_tuple(t);
