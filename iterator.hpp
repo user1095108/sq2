@@ -163,14 +163,10 @@ public:
   }
 };
 
-template <typename ...A>
-  requires(bool(sizeof...(A)) && !(std::is_reference_v<A> || ...))
+template <typename Tuple, int ...I>
 class range
 {
   sqlite3_stmt* s_;
-
-public:
-  using tuple_t = std::tuple<A...>;
 
 public:
   range() = default;
@@ -192,14 +188,29 @@ public:
   bool operator==(range const&) const = default;
 
   //
-  template <int ...I>
-  auto begin() const noexcept { return iterator<tuple_t, I...>(s_); }
-  auto end() const noexcept { return iterator<tuple_t>(); }
+  template <int ...J>
+  auto begin() const noexcept { return iterator<Tuple, J...>(s_); }
+  auto begin() const noexcept { return iterator<Tuple, I...>(s_); }
+  auto end() const noexcept { return iterator<Tuple, I...>(); }
 
   //
   auto clear_bindings() const noexcept { return sqlite3_clear_bindings(s_); }
   auto reset() const noexcept { return sqlite3_reset(s_); }
 };
+
+template <typename ...A>
+  requires(bool(sizeof...(A)) && !(std::is_reference_v<A> || ...))
+auto make_range(auto&& s) noexcept
+{
+  return range<std::tuple<A...>>(std::forward<decltype(s)>(s));
+}
+
+template <typename ...A, int ...I>
+  requires(bool(sizeof...(A)) && !(std::is_reference_v<A> || ...))
+auto make_range(auto&& s, std::integer_sequence<int, I...>) noexcept
+{
+  return range<std::tuple<A...>, I...>(std::forward<decltype(s)>(s));
+}
 
 }
 

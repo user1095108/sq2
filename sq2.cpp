@@ -78,11 +78,11 @@ int main()
   {
     auto s("SELECT ?/?"_sq2.unique(db));
     sq2::bind(s, 1., 3);
-    std::cout << *sq2::range<double>(s).begin() << std::endl;
+    std::cout << *sq2::make_range<double>(s).begin() << std::endl;
 
     s = "SELECT ?"_sq2.unique(db);
     sq2::bind(s, "test");
-    std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
+    std::cout << *sq2::make_range<std::string_view>(s).begin() << std::endl;
   }
 
 //"DROP TABLE IF EXISTS COMPANY;"
@@ -103,7 +103,7 @@ int main()
   {
     auto s("SELECT * FROM COMPANY"_sq2.unique(db));
 
-    sq2::range<std::string_view, int, std::string_view, double> r(s);
+    auto r(sq2::make_range<std::string_view, int, std::string_view, double>(s, std::integer_sequence<int, 0, 2>{}));
     std::cout << std::distance(r.begin(), {}) << std::endl;
 
     for (auto const& t: r) print_tuple(t);
@@ -113,8 +113,6 @@ int main()
     for (auto const& t: r) print_tuple(t);
     //for (auto const& t: std::list<decltype(*r.begin())>{r.begin(), {}} |
     //  std::views::reverse) print_tuple(t);
-
-    for (auto i(r.begin<0, 2>()); i != r.end(); ++i) print_tuple(*i);
   }
 
   {
@@ -136,7 +134,7 @@ int main()
 
     sq2::bind<1, 2>(s, 2.6 / w, 2.3 / h);
 
-    std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
+    std::cout << *sq2::make_range<std::string_view>(s).begin() << std::endl;
   }
 
   {
@@ -191,7 +189,7 @@ int main()
 
     sq2::bind(s, w, h);
 
-    std::cout << *sq2::range<std::string_view>(s).begin() << std::endl;
+    std::cout << *sq2::make_range<std::string_view>(s).begin() << std::endl;
   }
 
   return 0;
