@@ -199,14 +199,15 @@ public:
 };
 
 template <typename ...A>
-  requires(bool(sizeof...(A)) && !(std::is_reference_v<A> || ...))
+  requires((sizeof...(A) > 0) && !(std::is_reference_v<A> || ...))
 auto make_range(auto&& s) noexcept
 {
   return range<std::tuple<A...>>(std::forward<decltype(s)>(s));
 }
 
 template <typename ...A, int ...I>
-  requires(bool(sizeof...(A)) && !(std::is_reference_v<A> || ...))
+  requires((sizeof...(A) > 0) && !(std::is_reference_v<A> || ...) &&
+    (sizeof...(I) > 0))
 auto make_range(auto&& s, std::integer_sequence<int, I...>) noexcept
 {
   return range<std::tuple<A...>, I...>(std::forward<decltype(s)>(s));
