@@ -206,8 +206,7 @@ auto make_range(auto&& s) noexcept
 }
 
 template <typename ...A, int ...I>
-  requires((sizeof...(A) > 0) && !(std::is_reference_v<A> || ...) &&
-    (sizeof...(I) > 0))
+  requires((sizeof...(A) > 0) && !(std::is_reference_v<A> || ...))
 auto make_range(auto&& s, std::integer_sequence<int, I...>) noexcept
 {
   return range<std::tuple<A...>, I...>(std::forward<decltype(s)>(s));
