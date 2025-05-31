@@ -20,7 +20,7 @@ namespace detail
 {
 
 inline decltype(auto) get(auto&& s) noexcept
-  requires(std::is_pointer_v<std::remove_reference_t<decltype(s)>>)
+  requires(std::is_same_v<std::remove_cvref_t<decltype(s)>, sqlite3_stmt*>)
 {
   return std::forward<decltype(s)>(s);
 }
