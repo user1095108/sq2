@@ -100,7 +100,7 @@ inline auto user_bind(auto&& s, auto&& a) noexcept
     SQLITE_TRANSIENT, SQLITE_UTF8);
 }
 
-template <int ...I> requires(bool(sizeof...(I)))
+template <int ...I> requires(sizeof...(I) > 0)
 inline auto bind(auto&& s, auto&& ...a) noexcept
   requires(sizeof...(a) == sizeof...(I))
 {
@@ -128,7 +128,7 @@ inline auto bind(auto&& s, auto&& ...a) noexcept
 }
 
 inline auto bind(auto&& s, auto&& ...a) noexcept
-  requires(bool(sizeof...(a)))
+  requires(sizeof...(a) > 0)
 {
   return bind<1>(std::forward<decltype(s)>(s),
     std::forward<decltype(a)>(a)...);
