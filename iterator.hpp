@@ -115,6 +115,8 @@ public:
   iterator& operator=(iterator&&) = default;
 
   //
+  bool operator==(iterator const&) const = default;
+
   template <int ...J>
   bool operator==(iterator<Tuple, J...> const& o) const noexcept
   {
@@ -169,6 +171,8 @@ public:
 template <typename Tuple, int ...I>
 class range
 {
+  template <typename, int ...> friend class range;
+
   sqlite3_stmt* s_;
 
 public:
@@ -189,6 +193,12 @@ public:
 
   //
   bool operator==(range const&) const = default;
+
+  template <int ...J>
+  bool operator==(range<Tuple, J...> const& o) const noexcept
+  {
+    return s_ == o.s_;
+  }
 
   //
   template <int ...J>
