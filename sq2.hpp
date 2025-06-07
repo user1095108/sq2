@@ -10,12 +10,12 @@ namespace sq2
 namespace detail
 {
 
-struct sqlite3_db_deleter
+struct sqlite3_db_deleter final
 {
   void operator()(sqlite3* const p) const noexcept { sqlite3_close_v2(p); }
 };
 
-struct sqlite3_stmt_deleter
+struct sqlite3_stmt_deleter final
 {
   void operator()(sqlite3_stmt* const p) const noexcept
   {
