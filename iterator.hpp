@@ -166,6 +166,9 @@ public:
     else
       return user_deref<0>(s_, tag<value_type>{});
   }
+
+  //
+  void reset() noexcept { sqlite3_reset(s_); ++*this; }
 };
 
 template <typename Tuple, int ...I>
@@ -205,10 +208,6 @@ public:
   auto begin() const noexcept { return iterator<Tuple, J...>(s_); }
   auto begin() const noexcept { return iterator<Tuple, I...>(s_); }
   auto end() const noexcept { return iterator<Tuple, I...>(); }
-
-  //
-  auto clear_bindings() const noexcept { return sqlite3_clear_bindings(s_); }
-  auto reset() const noexcept { return sqlite3_reset(s_); }
 };
 
 template <typename ...A>

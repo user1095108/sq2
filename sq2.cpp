@@ -83,6 +83,16 @@ int main()
     s = "SELECT ?"_sq2.unique(db);
     sq2::bind(s, "test");
     print_tuple(*sq2::make_range<std::string_view>(s).begin<0, 0, 0>());
+
+    s = "SELECT random() & 9223372036854775807"_sq2.unique(db);
+
+    auto j(sq2::make_range<std::string_view>(s).begin());
+
+    for (unsigned i{}; i != 10; ++i)
+    {
+      std::cout << *j << '\n';
+      j.reset();
+    }
   }
 
 //"DROP TABLE IF EXISTS COMPANY;"
@@ -157,7 +167,7 @@ int main()
       "    WHEN r < 0.93 THEN 0.23 * x + 0.22 * y + 1.6"
       "    ELSE 0.26 * x + 0.24 * y + 0.44"
       "  END\n"
-      "FROM fern, (SELECT (random() & 9223372036854775807) / 9223372036854775807.0 r)\n"
+      "FROM fern, (SELECT (random() & 9223372036854775807) / 9223372036854775807.0 r)"
       "WHERE iter < 10000),"
       "scaled(x, y) AS ("
       "SELECT"
