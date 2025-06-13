@@ -88,11 +88,7 @@ int main()
 
     auto j(sq2::make_range<std::string_view>(s).begin());
 
-    for (unsigned i{}; i != 10; ++i)
-    {
-      std::cout << *j << '\n';
-      j.reset();
-    }
+    for (unsigned i{}; i != 10; ++i, j.reset()) std::cout << *j << '\n';
   }
 
 //"DROP TABLE IF EXISTS COMPANY;"
