@@ -135,8 +135,8 @@ int main()
       "SELECT group_concat(line, x'0d')FROM("
       "SELECT group_concat(ch, '') AS line FROM("
       "SELECT cy,substr(' .+*#', 1 + min(max(iter)/7, 4), 1) AS ch FROM m\n"
-      "GROUP BY cx,cy ORDER BY cy DESC,cx)"
-      "GROUP BY cy)"_sq2.unique(db));
+      "GROUP BY cx,cy)"
+      "GROUP BY cy ORDER BY cy DESC)"_sq2.unique(db));
 
     sq2::bind<1, 2>(s, 2.6 / w, 2.3 / h);
 
