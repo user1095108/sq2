@@ -135,7 +135,7 @@ public:
     return *this;
   }
 
-  auto operator++(int) noexcept { return ++*this; }
+  void operator++(int) noexcept(noexcept(++*this)) { ++*this; }
 
   // member access
   auto operator*() const
