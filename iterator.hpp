@@ -209,6 +209,9 @@ public:
   auto begin() const noexcept { return iterator<Tuple, J...>(s_); }
   auto begin() const noexcept { return iterator<Tuple, I...>(s_); }
   auto end() const noexcept { return iterator<Tuple, I...>(); }
+
+  //
+  void reset() const noexcept { sqlite3_reset(s_); }
 };
 
 template <typename ...A>
