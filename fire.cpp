@@ -13,6 +13,7 @@
 
 #include "sq2.hpp"
 
+using namespace std::literals::chrono_literals;
 using namespace sq2::literals;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -120,7 +121,7 @@ int main()
     r.reset();
     std::cout << *r.begin() << reset_screen << std::flush;
 
-    std::this_thread::sleep_until(frame_start + std::chrono::milliseconds(33));
+    std::this_thread::sleep_until(frame_start + 33ms);
   }
 
   return 0;
