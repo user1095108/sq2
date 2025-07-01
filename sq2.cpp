@@ -171,8 +171,8 @@ int main()
       "  ROUND((9.9983 - y) / (9.9983 - 0.0) * (?2 - 1))"
       "FROM fern),"
       "dedup AS (SELECT DISTINCT x,y FROM scaled),"
-      "xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x < ?1),"
-      "yseq(y) AS (VALUES(0) UNION ALL SELECT y + 1 FROM yseq WHERE y < ?2),"
+      "xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x < ?1 - 1),"
+      "yseq(y) AS (VALUES(0) UNION ALL SELECT y + 1 FROM yseq WHERE y < ?2 - 1),"
       "grid AS ("
       "  SELECT"
       "    xseq.x,"
@@ -185,13 +185,12 @@ int main()
       "      ELSE ' '"
       "    END AS ch"
       "  FROM xseq CROSS JOIN yseq"
-      "),"
-      "ordered_grid AS ("
-      "  SELECT y, group_concat(ch, '') AS line"
-      "  FROM(SELECT * FROM grid ORDER BY y, x)"
-      "  GROUP BY y"
       ")"
-      "SELECT group_concat(line, x'0d') FROM ordered_grid"_sq2.unique(db));
+      "SELECT group_concat(line, '') FROM ("
+      "  SELECT group_concat(ch, '') AS line"
+      "  FROM(SELECT * FROM grid ORDER BY x, y)"
+      "  GROUP BY y"
+      ")"_sq2.unique(db));
 
     sq2::bind(s, w, h);
 
