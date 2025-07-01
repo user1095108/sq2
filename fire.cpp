@@ -105,6 +105,8 @@ int main()
 
   auto const r(sq2::make_range<std::string_view>(render));
 
+  auto const reset_screen("\x0d\x1b[" + std::to_string(h - 1) + 'A');
+
   for (;;)
   {
     auto const frame_start(std::chrono::steady_clock::now());
@@ -116,9 +118,7 @@ int main()
     sq2::step(propagate);
 
     r.reset();
-    std::cout << *r.begin();
-
-    std::cout << "\x0d\x1b[" + std::to_string(h - 1) + 'A' << std::flush;
+    std::cout << *r.begin() << reset_screen << std::flush;
 
     std::this_thread::sleep_until(frame_start + std::chrono::milliseconds(33));
   }
