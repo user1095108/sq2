@@ -69,39 +69,39 @@ int main()
   sq2::step(s);
 
   auto const replace_bottom(
-      "WITH RECURSIVE"
-      "  xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x < ?1 - 1),"
-      "  grid(x, y, v) AS ("
-      "    SELECT xseq.x, ?2 - 1, .7 + .3 * abs(random() / 9223372036854775807.0)"
-      "    FROM xseq"
-      "  )"
-      "REPLACE INTO fb SELECT * from grid;"_sq2.unique(db));
+    "WITH RECURSIVE"
+    "  xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x < ?1 - 1),"
+    "  grid(x, y, v) AS ("
+    "    SELECT xseq.x, ?2 - 1, .7 + .3 * abs(random() / 9223372036854775807.0)"
+    "    FROM xseq"
+    "  )"
+    "REPLACE INTO fb SELECT * from grid;"_sq2.unique(db));
 
   sq2::bind(replace_bottom, w, h);
 
   auto const propagate(
-      "WITH RECURSIVE"
-      "  xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x < ?1 - 1),"
-      "  yseq(y) AS (VALUES(0) UNION ALL SELECT y + 1 FROM yseq WHERE y < ?2 - 2),"
-      "  grid(x, y, v) AS ("
-      "    SELECT xseq.x, yseq.y,"
-      "      MAX(MIN(("
-      "        (SELECT v FROM fb WHERE fb.x=(xseq.x-1+?1) % ?1 AND fb.y=(yseq.y+1) % ?2) +"
-      "        (SELECT v FROM fb WHERE fb.x=xseq.x AND fb.y=(yseq.y+1) % ?2) +"
-      "        (SELECT v FROM fb WHERE fb.x=(xseq.x+1) % ?1 AND fb.y=(yseq.y+1) % ?2) +"
-      "        (SELECT v FROM fb WHERE fb.x=xseq.x AND fb.y=(yseq.y+2) % ?2)"
-      "      ) / (4.45 + 1.7 * (random() / 9223372036854775807.0)), 1), 0)"
-      "    FROM xseq CROSS JOIN yseq"
-      "  )"
-      "REPLACE INTO fb SELECT * from grid;"_sq2.unique(db));
+    "WITH RECURSIVE"
+    "  xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x < ?1 - 1),"
+    "  yseq(y) AS (VALUES(0) UNION ALL SELECT y + 1 FROM yseq WHERE y < ?2 - 2),"
+    "  grid(x, y, v) AS ("
+    "    SELECT xseq.x, yseq.y,"
+    "      MAX(MIN(("
+    "        (SELECT v FROM fb WHERE fb.x=(xseq.x-1+?1) % ?1 AND fb.y=(yseq.y+1) % ?2) +"
+    "        (SELECT v FROM fb WHERE fb.x=xseq.x AND fb.y=(yseq.y+1) % ?2) +"
+    "        (SELECT v FROM fb WHERE fb.x=(xseq.x+1) % ?1 AND fb.y=(yseq.y+1) % ?2) +"
+    "        (SELECT v FROM fb WHERE fb.x=xseq.x AND fb.y=(yseq.y+2) % ?2)"
+    "      ) / (4.45 + 1.7 * (random() / 9223372036854775807.0)), 1), 0)"
+    "    FROM xseq CROSS JOIN yseq"
+    "  )"
+    "REPLACE INTO fb SELECT * from grid;"_sq2.unique(db));
 
   sq2::bind(propagate, w, h);
 
   auto const render(
-      "SELECT group_concat(line, x'0a')FROM("
-      "SELECT group_concat(ch, '') AS line FROM("
-      "SELECT x,y,substr(' ░▒▓█', 1 + round(4 * v * v), 1) AS ch FROM fb)"
-      "GROUP BY y ORDER BY y)"_sq2.unique(db));
+    "SELECT group_concat(line, x'0a')FROM("
+    "SELECT group_concat(ch, '') AS line FROM("
+    "SELECT x,y,substr(' ░▒▓█', 1 + round(4 * v * v), 1) AS ch FROM fb)"
+    "GROUP BY y ORDER BY y)"_sq2.unique(db));
 
   auto const r(sq2::make_range<std::string_view>(render));
 
