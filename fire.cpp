@@ -98,7 +98,7 @@ int main()
   sq2::bind(propagate, w, h);
 
   auto const render(
-    "SELECT group_concat(line, x'0a')FROM("
+    "SELECT group_concat(line, '')FROM("
     "SELECT group_concat(ch, '') AS line FROM("
     "SELECT x,y,substr(' ░▒▓█', 1 + round(4 * v * v), 1) AS ch FROM fb)"
     "GROUP BY y ORDER BY y)"_sq2.unique(db));
