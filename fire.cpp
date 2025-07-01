@@ -72,7 +72,7 @@ int main()
     "WITH RECURSIVE"
     "  xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x < ?1 - 1),"
     "  grid(x, y, v) AS ("
-    "    SELECT xseq.x, ?2 - 1, .7 + .3 * abs(random() / 9223372036854775807.0)"
+    "    SELECT xseq.x, ?2 - 1, min(max(abs(random() / 9223372036854775807.0), .3), 1.)"
     "    FROM xseq"
     "  )"
     "REPLACE INTO fb SELECT * from grid;"_sq2.unique(db));
@@ -100,7 +100,7 @@ int main()
   auto const render(
     "SELECT group_concat(line, '')FROM("
     "SELECT group_concat(ch, '') AS line FROM("
-    "SELECT x,y,substr(' ░▒▓█', 1 + round(4 * v * v), 1) AS ch FROM fb)"
+    "SELECT x,y,substr(' ░▒▓█', 1 + round(4 * pow(v, 1.1)), 1) AS ch FROM fb)"
     "GROUP BY y ORDER BY y)"_sq2.unique(db));
 
   auto const r(sq2::make_range<std::string_view>(render));
