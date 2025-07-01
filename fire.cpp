@@ -104,7 +104,7 @@ int main()
     "SELECT x,y,substr(' ░▒▓█', 1 + round(4 * pow(v, 1.1)), 1) AS ch FROM fb)"
     "GROUP BY y ORDER BY y)"_sq2.unique(db));
 
-  auto const r(sq2::make_range<std::string_view>(render));
+  auto i(sq2::make_range<std::string_view>(render).begin());
 
   auto const reset_screen("\x0d\x1b[" + std::to_string(h - 1) + 'A');
 
@@ -118,8 +118,8 @@ int main()
     sq2::reset(propagate);
     sq2::step(propagate);
 
-    r.reset();
-    std::cout << *r.begin() << reset_screen << std::flush;
+    std::cout << *i << reset_screen << std::flush;
+    i.reset();
 
     std::this_thread::sleep_until(frame_start + 33ms);
   }
