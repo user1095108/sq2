@@ -124,15 +124,15 @@ int main()
   {
     auto const s(
       "WITH RECURSIVE\n"
-      "xaxis(x)AS(VALUES(-1.3)UNION ALL SELECT x+?1 FROM xaxis WHERE x<1.3),"
-      "yaxis(y)AS(VALUES(-1.15)UNION ALL SELECT y+?2 FROM yaxis WHERE y<1.15),"
+      "xaxis(x)AS(VALUES(-1.3)UNION ALL SELECT x+?1 FROM xaxis WHERE x<1.3 - ?1),"
+      "yaxis(y)AS(VALUES(-1.15)UNION ALL SELECT y+?2 FROM yaxis WHERE y<1.15 - ?2),"
       "m(iter,cx,cy,x,y)AS("
       "SELECT 0,x,y,x,y FROM xaxis,yaxis\n"
       "UNION ALL\n"
       "SELECT iter+1,cx,cy,x*x-y*y+0.0,2.0*x*y-0.8 FROM m\n"
       "WHERE(x*x+y*y)<4.0 AND iter<28"
       ")"
-      "SELECT group_concat(line, x'0d')FROM("
+      "SELECT group_concat(line, '') FROM("
       "SELECT group_concat(ch, '') AS line FROM("
       "SELECT cy,substr(' .+*#', 1 + min(max(iter)/7, 4), 1) AS ch FROM m\n"
       "GROUP BY cx,cy ORDER BY cx)"
