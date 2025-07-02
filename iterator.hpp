@@ -169,7 +169,10 @@ public:
   }
 
   //
-  void reset() noexcept { sqlite3_reset(s_); ++*this; }
+  auto reset() noexcept
+  {
+    auto const r(sqlite3_reset(s_)); ++*this; return r;
+  }
 };
 
 template <typename Tuple, int ...I>
@@ -211,7 +214,7 @@ public:
   auto end() const noexcept { return iterator<Tuple, I...>(); }
 
   //
-  void reset() const noexcept { sqlite3_reset(s_); }
+  auto reset() const noexcept { return sqlite3_reset(s_); }
 };
 
 template <typename ...A>

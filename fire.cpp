@@ -119,7 +119,6 @@ int main()
 
     std::cout << *i << reset_screen;
     i.reset();
-    std::cout.flush();
 
     std::this_thread::sleep_until(frame_start + 33ms);
   }
