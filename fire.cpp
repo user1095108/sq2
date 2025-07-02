@@ -46,28 +46,30 @@ int main()
   auto const db(":memory:"_sq2.open_unique(SQLITE_OPEN_READWRITE |
     SQLITE_OPEN_CREATE));
 
-  auto s(
-    "CREATE TABLE fb("
-    "  x INTEGER,"
-    "  y INTEGER,"
-    "  v REAL,"
-    "  PRIMARY KEY (x, y))"_sq2.unique(db)
-  );
+  {
+    auto s(
+      "CREATE TABLE fb("
+      "  x INTEGER,"
+      "  y INTEGER,"
+      "  v REAL,"
+      "  PRIMARY KEY (x, y))"_sq2.unique(db)
+    );
 
-  sq2::step(s);
+    sq2::step(s);
 
-  s =
-    "WITH RECURSIVE"
-    "  xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x < ?1 - 1),"
-    "  yseq(y) AS (VALUES(0) UNION ALL SELECT y + 1 FROM yseq WHERE y < ?2 - 1),"
-    "  grid(x, y, v) AS ("
-    "    SELECT xseq.x, yseq.y, .0"
-    "    FROM xseq CROSS JOIN yseq"
-    "  )"
-    "INSERT INTO fb SELECT * FROM grid"_sq2.unique(db);
+    s =
+      "WITH RECURSIVE"
+      "  xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x < ?1 - 1),"
+      "  yseq(y) AS (VALUES(0) UNION ALL SELECT y + 1 FROM yseq WHERE y < ?2 - 1),"
+      "  grid(x, y, v) AS ("
+      "    SELECT xseq.x, yseq.y, .0"
+      "    FROM xseq CROSS JOIN yseq"
+      "  )"
+      "INSERT INTO fb SELECT * FROM grid"_sq2.unique(db);
 
-  sq2::bind(s, w, h);
-  sq2::step(s);
+    sq2::bind(s, w, h);
+    sq2::step(s);
+  }
 
   auto const replace_bottom(
     "WITH RECURSIVE"
