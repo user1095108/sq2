@@ -114,14 +114,12 @@ int main()
   {
     auto const frame_start(std::chrono::steady_clock::now());
 
-    sq2::reset(replace_bottom);
-    sq2::step(replace_bottom);
+    sq2::reset(replace_bottom, propagate);
+    sq2::step(replace_bottom, propagate);
 
-    sq2::reset(propagate);
-    sq2::step(propagate);
-
-    std::cout << *i << reset_screen << std::flush;
+    std::cout << *i << reset_screen;
     i.reset();
+    std::cout.flush();
 
     std::this_thread::sleep_until(frame_start + 33ms);
   }

@@ -151,7 +151,27 @@ inline auto column_count(auto&& s) noexcept
 }
 
 inline auto reset(auto&& s) noexcept { return sqlite3_reset(detail::get(s)); }
+
+inline auto reset(auto&& ...s) noexcept requires(sizeof...(s) > 1)
+{
+  int r;
+
+  (((r = sqlite3_reset(detail::get(s))) == SQLITE_OK) && ...);
+
+  return r;
+}
+
 inline auto step(auto&& s) noexcept { return sqlite3_step(detail::get(s)); }
+
+inline auto step(auto&& ...s) noexcept requires(sizeof...(s) > 1)
+{
+  int r;
+
+  ((((r = sqlite3_step(detail::get(s))) == SQLITE_ROW) ||
+    (r == SQLITE_DONE)) && ...);
+
+  return r;
+}
 
 //
 namespace detail
