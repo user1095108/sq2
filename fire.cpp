@@ -104,7 +104,7 @@ int main()
     "SELECT group_concat(line, '') FROM("
     "SELECT group_concat(ch, '') AS line FROM("
     "SELECT x,y,substr(' ░▒▓█', 1 + round(4 * pow(max(min(v, 1.0), .0), 1.1)), 1) AS ch FROM fb)"
-    "GROUP BY y ORDER BY y)"_sq2.unique(db));
+    "GROUP BY y ORDER BY x, y)"_sq2.unique(db));
 
   auto i(sq2::make_range<std::string_view>(render).begin());
 
