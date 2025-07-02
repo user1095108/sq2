@@ -39,7 +39,7 @@ int main()
       ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
 
       w = ws.ws_col;
-      h = ws.ws_row - 1;
+      h = ws.ws_row;
     #endif
   }
 
@@ -49,9 +49,9 @@ int main()
   {
     auto s(
       "CREATE TABLE fb("
-      "  x INTEGER,"
-      "  y INTEGER,"
-      "  v REAL,"
+      "  x INTEGER NOT NULL,"
+      "  y INTEGER NOT NULL,"
+      "  v REAL NOT NULL,"
       "  PRIMARY KEY (x, y))"_sq2.unique(db)
     );
 
@@ -103,12 +103,15 @@ int main()
   auto const render(
     "SELECT group_concat(line, '') FROM("
     "SELECT group_concat(ch, '') AS line FROM("
-    "SELECT x,y,substr(' ░▒▓█', 1 + round(4 * pow(max(min(v, 1.0), .0), 1.1)), 1) AS ch FROM fb)"
-    "GROUP BY y ORDER BY x, y)"_sq2.unique(db));
+    "SELECT x,y,"
+    "CASE WHEN y=?1-1 THEN '' ELSE substr(' ░▒▓█', 1 + round(4 * pow(max(min(v, 1.0), .0), 1.1)), 1) END AS ch FROM fb)"
+    "GROUP BY y ORDER BY y)"_sq2.unique(db));
+
+  sq2::bind(render, h);
 
   auto i(sq2::make_range<std::string_view>(render).begin());
 
-  auto const reset_screen("\x0d\x1b[" + std::to_string(h - 1) + 'A');
+  auto const reset_screen("\x0d\x1b[" + std::to_string(h - 2) + 'A');
 
   for (;;)
   {
