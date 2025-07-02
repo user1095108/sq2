@@ -39,7 +39,7 @@ int main()
       ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
 
       w = ws.ws_col;
-      h = ws.ws_row;
+      h = ws.ws_row + 1;
     #endif
   }
 
