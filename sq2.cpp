@@ -187,8 +187,8 @@ int main()
       "  FROM xseq CROSS JOIN yseq"
       ")"
       "SELECT group_concat(line, '') FROM ("
-      "  SELECT group_concat(ch, '') AS line"
-      "  FROM(SELECT * FROM grid ORDER BY x, y)"
+      "  SELECT group_concat(ch, '' ORDER BY x) AS line"
+      "  FROM(SELECT * FROM grid ORDER BY y)"
       "  GROUP BY y"
       ")"_sq2.unique(db));
 
