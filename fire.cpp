@@ -98,7 +98,6 @@ int main()
     "  )"
     "REPLACE INTO fb SELECT * from grid;"_sq2.unique(db));
 
-
   sq2::bind(propagate, w, h);
 
   auto const render(
