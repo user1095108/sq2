@@ -167,8 +167,8 @@ inline auto step(auto&& ...s) noexcept requires(sizeof...(s) > 1)
 {
   int r;
 
-  ((((r = sqlite3_step(detail::get(s))) == SQLITE_ROW) ||
-    (r == SQLITE_DONE)) && ...);
+  ((((r = sqlite3_step(detail::get(s))) == SQLITE_DONE) ||
+    (r == SQLITE_ROW)) && ...);
 
   return r;
 }
