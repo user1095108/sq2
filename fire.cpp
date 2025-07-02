@@ -75,7 +75,7 @@ int main()
     "WITH RECURSIVE"
     "  xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x < ?1 - 1),"
     "  grid(x, y, v) AS ("
-    "    SELECT xseq.x, ?2 - 1, min(max(abs(random() / 9223372036854775807.0), .5), 1.)"
+    "    SELECT xseq.x, ?2 - 1, min(max((random() & 9007199254740991) / 9007199254740991.0, .5), 1.)"
     "    FROM xseq"
     "  )"
     "REPLACE INTO fb SELECT * from grid;"_sq2.unique(db));
@@ -93,10 +93,11 @@ int main()
     "        2.2 * (SELECT v FROM fb WHERE fb.x=xseq.x AND fb.y=(yseq.y+1) % ?2) +"
     "        0.4 * (SELECT v FROM fb WHERE fb.x=(xseq.x+1) % ?1 AND fb.y=(yseq.y+1) % ?2) +"
     "        1 * (SELECT v FROM fb WHERE fb.x=xseq.x AND fb.y=(yseq.y+2) % ?2)"
-    "      ) / (4.45 + 1.7 * (random() / 9223372036854775807.0))"
+    "      ) / (4.45 + 1.7 * (2 * ((random() & 9007199254740991) / 9007199254740991.0) - 1))"
     "    FROM xseq CROSS JOIN yseq"
     "  )"
     "REPLACE INTO fb SELECT * from grid;"_sq2.unique(db));
+
 
   sq2::bind(propagate, w, h);
 
