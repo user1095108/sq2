@@ -86,12 +86,12 @@ int main()
     "  yseq(y) AS (VALUES(0) UNION ALL SELECT y + 1 FROM yseq WHERE y < ?2 - 2),"
     "  grid(x, y, v) AS ("
     "    SELECT xseq.x, yseq.y,"
-    "      MAX(MIN(("
+    "      ("
     "        0.4 * (SELECT v FROM fb WHERE fb.x=(xseq.x-1+?1) % ?1 AND fb.y=(yseq.y+1) % ?2) +"
     "        2.2 * (SELECT v FROM fb WHERE fb.x=xseq.x AND fb.y=(yseq.y+1) % ?2) +"
     "        0.4 * (SELECT v FROM fb WHERE fb.x=(xseq.x+1) % ?1 AND fb.y=(yseq.y+1) % ?2) +"
     "        1 * (SELECT v FROM fb WHERE fb.x=xseq.x AND fb.y=(yseq.y+2) % ?2)"
-    "      ) / (4.45 + 1.7 * (random() / 9223372036854775807.0)), 1), 0)"
+    "      ) / (4.45 + 1.7 * (random() / 9223372036854775807.0))"
     "    FROM xseq CROSS JOIN yseq"
     "  )"
     "REPLACE INTO fb SELECT * from grid;"_sq2.unique(db));
@@ -99,9 +99,9 @@ int main()
   sq2::bind(propagate, w, h);
 
   auto const render(
-    "SELECT group_concat(line, '')FROM("
+    "SELECT group_concat(line, '') FROM("
     "SELECT group_concat(ch, '') AS line FROM("
-    "SELECT x,y,substr(' ░▒▓█', 1 + round(4 * pow(v, 1.1)), 1) AS ch FROM fb)"
+    "SELECT x,y,substr(' ░▒▓█', 1 + round(4 * pow(max(min(v, 1.0), .0), 1.1)), 1) AS ch FROM fb)"
     "GROUP BY y ORDER BY y)"_sq2.unique(db));
 
   auto i(sq2::make_range<std::string_view>(render).begin());
