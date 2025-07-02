@@ -102,7 +102,7 @@ int main()
 
   auto const render(
     "SELECT group_concat(line, '') FROM("
-    "SELECT group_concat(ch, '') AS line FROM("
+    "SELECT group_concat(ch, '' ORDER BY x) AS line FROM("
     "SELECT x,y,"
     "CASE WHEN y=?1-1 THEN '' ELSE substr(' ░▒▓█', 1 + round(4 * pow(max(min(v, 1.0), .0), 1.1)), 1) END AS ch FROM fb)"
     "GROUP BY y ORDER BY y)"_sq2.unique(db));
