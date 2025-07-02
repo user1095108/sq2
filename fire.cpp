@@ -13,8 +13,8 @@
 
 #include "sq2.hpp"
 
-using namespace std::literals::chrono_literals;
 using namespace sq2::literals;
+using namespace std::literals::chrono_literals;
 
 //////////////////////////////////////////////////////////////////////////////
 int main()
@@ -73,7 +73,7 @@ int main()
     "WITH RECURSIVE"
     "  xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x < ?1 - 1),"
     "  grid(x, y, v) AS ("
-    "    SELECT xseq.x, ?2 - 1, min(max(abs(random() / 9223372036854775807.0), .3), 1.)"
+    "    SELECT xseq.x, ?2 - 1, min(max(abs(random() / 9223372036854775807.0), .05), .7)"
     "    FROM xseq"
     "  )"
     "REPLACE INTO fb SELECT * from grid;"_sq2.unique(db));
@@ -87,10 +87,10 @@ int main()
     "  grid(x, y, v) AS ("
     "    SELECT xseq.x, yseq.y,"
     "      MAX(MIN(("
-    "        (SELECT v FROM fb WHERE fb.x=(xseq.x-1+?1) % ?1 AND fb.y=(yseq.y+1) % ?2) +"
-    "        (SELECT v FROM fb WHERE fb.x=xseq.x AND fb.y=(yseq.y+1) % ?2) +"
-    "        (SELECT v FROM fb WHERE fb.x=(xseq.x+1) % ?1 AND fb.y=(yseq.y+1) % ?2) +"
-    "        (SELECT v FROM fb WHERE fb.x=xseq.x AND fb.y=(yseq.y+2) % ?2)"
+    "        0.4 * (SELECT v FROM fb WHERE fb.x=(xseq.x-1+?1) % ?1 AND fb.y=(yseq.y+1) % ?2) +"
+    "        2.2 * (SELECT v FROM fb WHERE fb.x=xseq.x AND fb.y=(yseq.y+1) % ?2) +"
+    "        0.4 * (SELECT v FROM fb WHERE fb.x=(xseq.x+1) % ?1 AND fb.y=(yseq.y+1) % ?2) +"
+    "        1 * (SELECT v FROM fb WHERE fb.x=xseq.x AND fb.y=(yseq.y+2) % ?2)"
     "      ) / (4.45 + 1.7 * (random() / 9223372036854775807.0)), 1), 0)"
     "    FROM xseq CROSS JOIN yseq"
     "  )"
