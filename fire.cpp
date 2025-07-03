@@ -122,7 +122,7 @@ int main()
     std::cout << *i << reset_screen;
 
     i.reset();
-    sq2::reset(replace_bottom, propagate);
+    //sq2::reset(replace_bottom, propagate);
 
     std::this_thread::sleep_until(frame_start + 33ms);
   }
