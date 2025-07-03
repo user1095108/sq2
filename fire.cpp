@@ -75,7 +75,7 @@ int main()
     "WITH RECURSIVE"
     "  xseq(x) AS (VALUES(0) UNION ALL SELECT x + 1 FROM xseq WHERE x < ?1 - 1),"
     "  grid(x, y, v) AS ("
-    "    SELECT xseq.x, ?2 - 1, min(max((random() & 9007199254740991) / 9007199254740991.0, .5), 1.)"
+    "    SELECT xseq.x, ?2 - 1, ((random() & 9007199254740991) / 9007199254740991.0) / 2 + .5"
     "    FROM xseq"
     "  )"
     "REPLACE INTO fb SELECT * from grid;"_sq2.unique(db));
