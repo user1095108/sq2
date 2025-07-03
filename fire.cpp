@@ -117,12 +117,11 @@ int main()
   {
     auto const frame_start(std::chrono::steady_clock::now());
 
-    sq2::step(replace_bottom, propagate);
+    // resets are not strictly necessary,
+    // https://stackoverflow.com/questions/35741175/sqlite3-reset-when-is-it-needed
+    sq2::step(replace_bottom, propagate, render);
 
     std::cout << *i << reset_screen;
-
-    i.reset();
-    //sq2::reset(replace_bottom, propagate);
 
     std::this_thread::sleep_until(frame_start + 33ms);
   }
